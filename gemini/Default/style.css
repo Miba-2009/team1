@@ -1,0 +1,88 @@
+/*
+  制作開始用の未完成CSSです。
+  TODOを探して、企画に合う色・大きさ・配置へ変更してください。
+*/
+:root {
+  /* TODO: 作品のテーマカラーへ変更する。 */
+  --accent: #6757df;
+  --accent-dark: #4f40bf;
+  --ink: #182033;
+  --muted: #697185;
+  --line: #dfe3ed;
+  --surface: #ffffff;
+  --background: #f5f6fb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: "Yu Gothic UI", "Noto Sans JP", sans-serif;
+  background: var(--background);
+}
+
+button, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.site-header {
+  padding: 48px max(24px, calc((100% - 1080px) / 2));
+  color: white;
+  background: linear-gradient(135deg, var(--accent), #9384f0);
+}
+
+.label, .section-label {
+  margin: 0 0 8px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.site-header h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.4rem); }
+.site-header > p:not(.label, .status) { max-width: 680px; line-height: 1.7; }
+.status { display: inline-block; margin: 10px 0 0; padding: 6px 10px; border-radius: 999px; background: rgba(255, 255, 255, .18); font-size: .75rem; }
+.status.connected { background: rgba(25, 126, 78, .72); }
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
+  gap: 18px;
+  width: min(1080px, calc(100% - 32px));
+  margin: 24px auto;
+}
+
+.panel { padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: 0 12px 36px rgba(38, 43, 72, .08); }
+.panel-heading h2 { margin: 0 0 18px; }
+.section-label { color: var(--accent); }
+
+.message-list { min-height: 270px; max-height: 480px; padding: 15px; overflow-y: auto; border: 1px solid var(--line); border-radius: 14px; background: #fafaff; }
+.empty-message, .support-message { color: var(--muted); font-size: .84rem; }
+.message { max-width: 82%; margin: 0 0 12px; padding: 10px 13px; border-radius: 13px; line-height: 1.65; white-space: pre-wrap; }
+.message.user { margin-left: auto; color: white; background: var(--accent); }
+.message.assistant { border: 1px solid var(--line); background: white; }
+
+.question-form { display: grid; gap: 8px; margin-top: 16px; }
+.question-form label { font-size: .8rem; font-weight: 700; }
+.question-form textarea { width: 100%; padding: 12px; resize: vertical; border: 1px solid #cbd0dd; border-radius: 12px; outline: none; }
+.question-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(103, 87, 223, .14); }
+
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.button { padding: 10px 14px; color: var(--ink); border: 1px solid var(--line); border-radius: 10px; background: white; }
+.button.primary { color: white; border-color: var(--accent); background: var(--accent); }
+.button.primary:hover { background: var(--accent-dark); }
+.button:disabled { cursor: wait; opacity: .55; }
+
+.idea-panel { align-self: start; }
+.todo-card { margin-bottom: 10px; padding: 14px; border: 1px dashed #b9b3e6; border-radius: 12px; background: #f8f7ff; }
+.todo-card h3 { margin: 0 0 5px; color: var(--accent-dark); font-size: .82rem; }
+.todo-card p { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.55; }
+.idea-panel > .button { width: 100%; margin-top: 10px; }
+.notice { padding: 10px 20px 24px; color: var(--muted); font-size: .75rem; text-align: center; }
+
+/* TODO: スマートフォンで見やすい配置を考えて変更してもよい。 */
+@media (max-width: 760px) {
+  .site-header { padding: 34px 20px; }
+  .app-shell { grid-template-columns: 1fr; }
+  .panel { padding: 18px; }
+}
