@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>御神籤</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <header>
+        <div class="torii">⛩</div>
+        <h1>御神籤</h1>
+        <p>今日の運勢を占います</p>
+    </header>
+
+    <section class="omikuji-card">
+
+        <div id="result" class="result">
+
+            <div class="result-label">
+                今日の運勢
+            </div>
+
+            <div id="fortune">
+                
+            </div>
+
+            <div id="quote">
+                おみくじを引いてください
+            </div>
+
+            <div id="author"></div>
+
+        </div>
+
+        <button id="drawButton">
+            🎋 おみくじを引く
+        </button>
+
+        <div id="cooldown"></div>
+
+    </section>
+
+    <button id="bookButton" class="book-button">
+        📖 御神籤図鑑
+    </button>
+
+    <section id="book" class="book hidden">
+
+        <h2>御神籤図鑑</h2>
+
+        <p>
+            <span id="count">0</span> / 42 種類発見
+        </p>
+
+        <div id="bookGrid"></div>
+
+    </section>
+
+    <p class="footer">
+        今日も良い一日になりますように
+    </p>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
