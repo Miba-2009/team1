@@ -3,69 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>御神籤</title>
+
+    <title>⛩ 名言御神籤</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="app">
+<div class="background-torii left">⛩</div>
+<div class="background-torii right">⛩</div>
 
-    <header>
+<main class="app">
+
+    <!-- =========================
+         ヘッダー
+    ========================== -->
+
+    <header class="header">
+
+        <div class="crest">✦　✦　✦</div>
+
         <div class="torii">⛩</div>
-        <h1>御神籤</h1>
-        <p>今日の運勢を占います</p>
+
+        <h1>名言御神籤</h1>
+
+        <p>
+            偉人から、今日のあなたへ
+        </p>
+
     </header>
 
-    <section class="omikuji-card">
 
-        <div id="result" class="result">
+    <!-- =========================
+         おみくじ
+    ========================== -->
 
-            <div class="result-label">
-                今日の運勢
+    <section class="omikuji">
+
+        <div class="paper">
+
+            <div class="paper-label">
+                今日の御神籤
             </div>
 
             <div id="fortune">
-                
+                ？
             </div>
 
+            <div class="gold-line"></div>
+
             <div id="quote">
-                おみくじを引いてください
+                御神籤を引いてください
             </div>
 
             <div id="author"></div>
 
         </div>
 
+
         <button id="drawButton">
-            🎋 おみくじを引く
+            🎋　御神籤を引く
         </button>
 
         <div id="cooldown"></div>
 
     </section>
 
-    <button id="bookButton" class="book-button">
-        📖 御神籤図鑑
-    </button>
 
-    <section id="book" class="book hidden">
+    <!-- =========================
+         図鑑
+    ========================== -->
 
-        <h2>御神籤図鑑</h2>
+    <section class="collection">
 
-        <p>
-            <span id="count">0</span> / 42 種類発見
-        </p>
+        <div class="collection-header">
 
-        <div id="bookGrid"></div>
+            <div>
+                <small>COLLECTION</small>
+
+                <h2>
+                    名言図鑑
+                </h2>
+            </div>
+
+            <div class="progress">
+                <span id="count">0</span>
+                <small>/ 100</small>
+            </div>
+
+        </div>
+
+
+        <div id="bookGrid"
+             class="book-grid">
+        </div>
 
     </section>
 
-    <p class="footer">
-        今日も良い一日になりますように
-    </p>
 
-</div>
+    <!-- =========================
+         名言詳細
+    ========================== -->
+
+    <div id="modal"
+         class="modal">
+
+        <div class="modal-bg"></div>
+
+        <div class="modal-card">
+
+            <button id="closeModal"
+                    class="close">
+                ×
+            </button>
+
+            <div class="modal-title">
+                DISCOVERED QUOTE
+            </div>
+
+            <div id="modalFortune"
+                 class="modal-fortune">
+            </div>
+
+            <div id="modalQuote"
+                 class="modal-quote">
+            </div>
+
+            <div class="gold-line"></div>
+
+            <div id="modalAuthor"
+                 class="modal-author">
+            </div>
+
+            <div id="modalSource"
+                 class="modal-source">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+        今日も一歩、前へ。
+    </footer>
+
+</main>
 
 <script src="script.js"></script>
 
