@@ -1,455 +1,1003 @@
+/* =========================================================
+   学びの御神籤
+   神聖・豪華・和風 UI 完成版
+========================================================= */
+
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #070a13;
+    --bg-light: #11172a;
+
+    --red: #8f1727;
+    --red-light: #b62a3b;
+    --red-dark: #4c0c16;
+
+    --gold: #d6ae52;
+    --gold-light: #ffe7a0;
+    --gold-dark: #927027;
+
+    --paper: #f4e8cc;
+    --paper-dark: #d8c59d;
+
+    --text: #fff8e6;
+    --text-dark: #2c2119;
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
-    margin: 0;
     min-height: 100vh;
+
+    color: var(--text);
 
     font-family:
         "Yu Mincho",
         "Hiragino Mincho ProN",
+        "Noto Serif JP",
         serif;
-
-    color: #34281c;
 
     background:
         radial-gradient(
             circle at 50% 0%,
-            #fff9e9 0%,
-            #e9d7ae 45%,
-            #c2a66c 100%
+            rgba(143, 23, 39, 0.3),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 10% 80%,
+            rgba(214, 174, 82, 0.1),
+            transparent 30%
+        ),
+        linear-gradient(
+            145deg,
+            #04060d,
+            #0b1020 50%,
+            #05070d
         );
+
+    overflow-x: hidden;
 }
 
-
-/* =========================
-   背景
-========================= */
+/* =========================================================
+   背景の光粒
+========================================================= */
 
 body::before {
     content: "";
 
     position: fixed;
+
     inset: 0;
 
     pointer-events: none;
 
-    opacity: .12;
-
     background-image:
         radial-gradient(
-            #725522 1px,
+            circle,
+            rgba(255, 231, 160, 0.35) 1px,
             transparent 1px
         );
 
-    background-size: 24px 24px;
+    background-size:
+        85px 85px;
+
+    opacity: 0.15;
+
+    animation:
+        backgroundMove 20s linear infinite;
+
+    z-index: -2;
 }
 
+@keyframes backgroundMove {
+    from {
+        transform: translateY(0);
+    }
 
-.background-torii {
+    to {
+        transform: translateY(85px);
+    }
+}
+
+/* =========================================================
+   上部の淡い光
+========================================================= */
+
+body::after {
+    content: "";
+
     position: fixed;
 
-    color: #8e2020;
+    width: 700px;
+    height: 700px;
 
-    opacity: .035;
+    top: -400px;
+    left: 50%;
 
-    font-size: 240px;
+    transform: translateX(-50%);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 226, 135, 0.12),
+            transparent 65%
+        );
 
     pointer-events: none;
 
-    z-index: 0;
-}
-
-.background-torii.left {
-    left: -100px;
-    bottom: 20px;
-}
-
-.background-torii.right {
-    right: -100px;
-    top: 80px;
+    z-index: -1;
 }
 
 
-/* =========================
-   全体
-========================= */
+/* =========================================================
+   HEADER
+========================================================= */
 
-.app {
+header {
     position: relative;
 
-    z-index: 1;
-
-    width: min(94%, 900px);
-
-    margin: auto;
-
     padding:
-        35px
-        0
-        60px;
-}
+        42px 20px
+        34px;
 
-
-/* =========================
-   ヘッダー
-========================= */
-
-.header {
     text-align: center;
-
-    margin-bottom: 30px;
-}
-
-.crest {
-    color: #a98536;
-
-    letter-spacing: 7px;
-
-    font-size: 18px;
-}
-
-.torii {
-    color: #a32626;
-
-    font-size: 65px;
-
-    line-height: 1;
-}
-
-.header h1 {
-    margin:
-        8px
-        0;
-
-    color: #711d1d;
-
-    font-size: 43px;
-
-    letter-spacing: 11px;
-
-    text-shadow:
-        1px 1px 0 white;
-}
-
-.header p {
-    margin: 0;
-
-    color: #786b52;
-
-    font-size: 14px;
-
-    letter-spacing: 3px;
-}
-
-
-/* =========================
-   御神籤
-========================= */
-
-.omikuji {
-    width: min(100%, 650px);
-
-    margin: auto;
-}
-
-
-.paper {
-    position: relative;
-
-    min-height: 360px;
-
-    padding:
-        40px
-        25px;
 
     background:
         linear-gradient(
-            135deg,
-            #fffef9,
-            #f6ead0
+            180deg,
+            rgba(6, 8, 17, 0.98),
+            rgba(9, 12, 23, 0.78)
         );
 
-    border:
-        1px solid #b8954c;
+    border-bottom:
+        1px solid
+        rgba(214, 174, 82, 0.4);
 
     box-shadow:
-        0 20px 45px
-        rgba(60, 40, 15, .2);
-
-    text-align: center;
+        0 15px 50px
+        rgba(0, 0, 0, 0.55);
 }
 
+header::before {
+    content: "⛩";
 
-/* 四隅 */
+    display: block;
 
-.paper::before,
-.paper::after {
+    margin-bottom: 10px;
+
+    font-size: 48px;
+
+    color: var(--red-light);
+
+    filter:
+        drop-shadow(
+            0 0 15px
+            rgba(214, 174, 82, 0.45)
+        );
+}
+
+header::after {
     content: "";
 
     position: absolute;
 
-    width: 28px;
-    height: 28px;
+    bottom: -1px;
+    left: 50%;
 
-    border-color: #a32626;
+    width: 260px;
+    height: 2px;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--gold),
+            transparent
+        );
 }
 
-.paper::before {
-    left: 12px;
-    top: 12px;
+header h1 {
+    color: var(--gold-light);
 
-    border-left: 2px solid;
-    border-top: 2px solid;
+    font-size:
+        clamp(
+            28px,
+            5vw,
+            52px
+        );
+
+    font-weight: bold;
+
+    letter-spacing:
+        0.18em;
+
+    text-shadow:
+        0 0 12px
+        rgba(255, 231, 160, 0.25),
+
+        0 0 35px
+        rgba(214, 174, 82, 0.15);
 }
 
-.paper::after {
-    right: 12px;
-    bottom: 12px;
+header p {
+    margin-top: 12px;
 
-    border-right: 2px solid;
-    border-bottom: 2px solid;
-}
-
-
-.paper-label {
-    color: #917743;
+    color:
+        rgba(
+            255,
+            248,
+            230,
+            0.65
+        );
 
     font-size: 13px;
 
-    letter-spacing: 5px;
+    letter-spacing:
+        0.3em;
 }
 
 
-#fortune {
+/* =========================================================
+   MAIN
+========================================================= */
+
+main {
+    width:
+        min(
+            1100px,
+            94%
+        );
+
     margin:
-        25px
-        0
-        18px;
+        0 auto;
 
-    color: #a32626;
-
-    font-size: 52px;
-
-    font-weight: bold;
-
-    letter-spacing: 5px;
+    padding:
+        55px 0
+        110px;
 }
 
 
-.gold-line {
-    width: 90px;
+/* =========================================================
+   御神籤エリア
+========================================================= */
 
-    height: 1px;
+.omikuji-area {
+    position: relative;
+
+    max-width: 880px;
 
     margin:
-        0
-        auto;
+        0 auto 75px;
+
+    padding:
+        48px 30px
+        60px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        rgba(214, 174, 82, 0.5);
 
     background:
-        #b18a3b;
+        linear-gradient(
+            145deg,
+            rgba(50, 11, 20, 0.96),
+            rgba(8, 12, 24, 0.98)
+        );
+
+    border-radius: 7px;
+
+    box-shadow:
+        0 30px 90px
+        rgba(0, 0, 0, 0.6),
+
+        inset 0 0 50px
+        rgba(214, 174, 82, 0.035);
 }
 
 
-#quote {
-    max-width: 540px;
+/* 四隅の装飾 */
 
-    margin:
-        25px
-        auto
-        15px;
+.omikuji-area::before,
+.omikuji-area::after {
+    content: "";
 
-    font-size: 21px;
+    position: absolute;
 
-    font-weight: bold;
+    width: 75px;
+    height: 75px;
 
-    line-height: 1.9;
+    opacity: 0.75;
+}
+
+.omikuji-area::before {
+    top: 14px;
+    left: 14px;
+
+    border-top:
+        1px solid
+        var(--gold);
+
+    border-left:
+        1px solid
+        var(--gold);
+}
+
+.omikuji-area::after {
+    right: 14px;
+    bottom: 14px;
+
+    border-right:
+        1px solid
+        var(--gold);
+
+    border-bottom:
+        1px solid
+        var(--gold);
 }
 
 
-#author {
-    color: #67563d;
+/* =========================================================
+   タイトル
+========================================================= */
 
-    font-size: 16px;
+.omikuji-title {
+    margin-bottom: 28px;
 
-    letter-spacing: 2px;
+    color:
+        var(--gold-light);
+
+    font-size: 14px;
+
+    letter-spacing:
+        0.5em;
 }
 
 
-/* =========================
-   ボタン
-========================= */
+/* =========================================================
+   結果カード
+========================================================= */
 
-#drawButton {
-    width: 100%;
+.result {
+    position: relative;
 
-    margin-top: 20px;
+    min-height: 370px;
 
-    padding: 18px;
+    display:
+        flex;
 
-    border: none;
+    flex-direction:
+        column;
 
-    border-radius: 3px;
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    padding:
+        45px 30px;
+
+    overflow: hidden;
+
+    color:
+        var(--text-dark);
 
     background:
         linear-gradient(
             135deg,
-            #a32626,
-            #711919
+            #fff9e9,
+            #eee0c0
         );
 
-    color: white;
+    border:
+        1px solid
+        rgba(100, 65, 25, 0.3);
 
-    font-family: inherit;
+    border-radius: 5px;
 
-    font-size: 18px;
+    box-shadow:
+        0 20px 55px
+        rgba(0, 0, 0, 0.45),
+
+        inset 0 0 40px
+        rgba(100, 60, 20, 0.08);
+}
+
+
+/* 和紙の模様 */
+
+.result::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at 20% 30%,
+            rgba(130, 80, 20, 0.05),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 80% 70%,
+            rgba(130, 80, 20, 0.05),
+            transparent 25%
+        );
+
+    pointer-events: none;
+}
+
+
+/* 奉納 */
+
+.result::after {
+    content: "奉 納";
+
+    position: absolute;
+
+    top: 18px;
+    left: 22px;
+
+    color:
+        rgba(90, 45, 20, 0.35);
+
+    font-size: 11px;
+
+    letter-spacing:
+        0.25em;
+}
+
+
+/* =========================================================
+   レアリティ
+========================================================= */
+
+#fortune {
+    position: relative;
+
+    z-index: 1;
+
+    display: inline-block;
+
+    margin-bottom: 25px;
+
+    padding:
+        8px 32px;
+
+    color:
+        #7e1723;
+
+    font-size:
+        clamp(
+            25px,
+            4vw,
+            40px
+        );
 
     font-weight: bold;
 
-    letter-spacing: 3px;
+    letter-spacing:
+        0.2em;
+
+    border-top:
+        1px solid
+        rgba(126, 23, 35, 0.45);
+
+    border-bottom:
+        1px solid
+        rgba(126, 23, 35, 0.45);
+}
+
+
+/* =========================================================
+   名言
+========================================================= */
+
+#quote {
+    position: relative;
+
+    z-index: 1;
+
+    max-width: 730px;
+
+    color:
+        #2d2018;
+
+    font-size:
+        clamp(
+            18px,
+            3vw,
+            29px
+        );
+
+    font-weight: bold;
+
+    line-height:
+        2;
+
+    letter-spacing:
+        0.05em;
+}
+
+
+/* =========================================================
+   名言登場アニメーション
+========================================================= */
+
+@keyframes quoteAppear {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(18px);
+
+        filter:
+            blur(5px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+        filter:
+            blur(0);
+    }
+}
+
+
+/* =========================================================
+   作者
+========================================================= */
+
+#author {
+    position: relative;
+
+    z-index: 1;
+
+    margin-top: 22px;
+
+    color:
+        rgba(
+            45,
+            32,
+            24,
+            0.65
+        );
+
+    font-size: 15px;
+
+    letter-spacing:
+        0.1em;
+}
+
+
+/* =========================================================
+   御神籤ボタン
+========================================================= */
+
+#drawButton {
+    position: relative;
+
+    z-index: 2;
+
+    min-width: 290px;
+
+    margin-top: 38px;
+
+    padding:
+        17px 35px;
+
+    border:
+        1px solid
+        #f4d77d;
+
+    border-radius: 4px;
+
+    color:
+        #fff5d2;
+
+    background:
+        linear-gradient(
+            135deg,
+            #74111f,
+            #a91e31
+        );
+
+    font-family: inherit;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    letter-spacing:
+        0.2em;
 
     cursor: pointer;
 
     box-shadow:
-        0 6px 0 #4f1111,
-        0 12px 25px
-        rgba(70, 20, 20, .2);
+        0 10px 30px
+        rgba(0, 0, 0, 0.4),
 
-    transition: .2s;
+        0 0 25px
+        rgba(214, 174, 82, 0.12);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-#drawButton:hover {
-    transform:
-        translateY(-2px);
+#drawButton::before {
+    content: "◆";
+
+    margin-right: 12px;
+
+    color:
+        var(--gold-light);
 }
 
-#drawButton:active {
+#drawButton:hover:not(:disabled) {
     transform:
-        translateY(5px);
+        translateY(-4px);
 
     box-shadow:
-        0 1px 0 #4f1111;
+        0 15px 40px
+        rgba(0, 0, 0, 0.5),
+
+        0 0 35px
+        rgba(214, 174, 82, 0.25);
+}
+
+#drawButton:active:not(:disabled) {
+    transform:
+        translateY(1px);
 }
 
 #drawButton:disabled {
-    background: #888075;
-
-    box-shadow: none;
+    opacity: 0.45;
 
     cursor: not-allowed;
 }
 
 
-/* =========================
-   タイマー
-========================= */
+/* =========================================================
+   クールタイム
+========================================================= */
 
 #cooldown {
-    min-height: 22px;
+    margin-top: 18px;
 
-    margin-top: 12px;
-
-    text-align: center;
-
-    color: #8c2929;
+    color:
+        rgba(
+            255,
+            248,
+            230,
+            0.6
+        );
 
     font-size: 13px;
+
+    letter-spacing:
+        0.08em;
 }
 
 
-/* =========================
-   図鑑
-========================= */
+/* =========================================================
+   クールタイム中の神託
+========================================================= */
 
-.collection {
-    margin-top: 50px;
+#cooldownMessage {
+    max-width: 760px;
+
+    margin:
+        30px auto 0;
+
+    padding:
+        28px 25px;
+
+    border:
+        1px solid
+        rgba(
+            214,
+            174,
+            82,
+            0.35
+        );
+
+    border-radius: 5px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 14, 27, 0.65),
+            rgba(11, 17, 32, 0.8)
+        );
+
+    box-shadow:
+        inset 0 0 35px
+        rgba(214, 174, 82, 0.03);
+}
+
+.support-title {
+    margin-bottom: 14px;
+
+    color:
+        var(--gold-light);
+
+    font-size: 12px;
+
+    letter-spacing:
+        0.3em;
+}
+
+.support-text {
+    font-size:
+        clamp(
+            16px,
+            2vw,
+            20px
+        );
+
+    line-height:
+        1.9;
+}
+
+.today-challenge {
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid
+        rgba(
+            214,
+            174,
+            82,
+            0.2
+        );
+}
+
+.challenge-title {
+    margin-bottom: 8px;
+
+    color:
+        var(--gold);
+
+    font-size: 12px;
+
+    letter-spacing:
+        0.1em;
+}
+
+.challenge-text {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.9
+        );
+
+    font-size: 16px;
 }
 
 
-.collection-header {
+/* =========================================================
+   セクションタイトル
+========================================================= */
+
+.section-title {
+    margin-bottom: 35px;
+
+    text-align: center;
+}
+
+.section-title h2 {
+    display: inline-block;
+
+    color:
+        var(--gold-light);
+
+    font-size:
+        clamp(
+            22px,
+            4vw,
+            32px
+        );
+
+    letter-spacing:
+        0.2em;
+}
+
+.section-title h2::before,
+.section-title h2::after {
+    content: " ✦ ";
+
+    color:
+        var(--gold);
+}
+
+
+/* =========================================================
+   達成率
+========================================================= */
+
+.achievement {
+    max-width: 880px;
+
+    margin:
+        0 auto 60px;
+
+    padding: 25px;
+
+    border:
+        1px solid
+        rgba(
+            214,
+            174,
+            82,
+            0.3
+        );
+
+    border-radius: 5px;
+
+    background:
+        rgba(
+            8,
+            11,
+            22,
+            0.7
+        );
+}
+
+.achievement-info {
     display: flex;
 
-    align-items: end;
+    justify-content:
+        space-between;
 
-    justify-content: space-between;
+    align-items:
+        center;
 
-    padding-bottom: 12px;
-
-    margin-bottom: 18px;
-
-    border-bottom:
-        1px solid
-        rgba(120,90,35,.4);
+    margin-bottom: 12px;
 }
 
-
-.collection-header small {
-    color: #a4863b;
-
-    letter-spacing: 4px;
-}
-
-
-.collection-header h2 {
-    margin:
-        5px
-        0
-        0;
-
-    color: #711d1d;
-
-    font-size: 28px;
-
-    letter-spacing: 5px;
-}
-
-
-.progress {
-    color: #766951;
-
-    font-size: 15px;
-}
-
-.progress span {
-    color: #a32626;
+#achievementRate {
+    color:
+        var(--gold-light);
 
     font-size: 28px;
 
     font-weight: bold;
 }
 
+#achievementCount {
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.55
+        );
 
-/* =========================
-   カード
-========================= */
+    font-size: 14px;
+}
 
-.book-grid {
+.progress {
+    height: 9px;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+}
+
+#progressBar {
+    width: 0;
+
+    height: 100%;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #761321,
+            var(--gold),
+            #ffe9a4
+        );
+
+    box-shadow:
+        0 0 18px
+        rgba(
+            214,
+            174,
+            82,
+            0.4
+        );
+
+    transition:
+        width 0.8s ease;
+}
+
+
+/* =========================================================
+   図鑑
+========================================================= */
+
+#bookGrid {
     display: grid;
 
     grid-template-columns:
-        repeat(5, 1fr);
+        repeat(
+            auto-fill,
+            minmax(
+                150px,
+                1fr
+            )
+        );
 
-    gap: 12px;
+    gap: 15px;
 }
 
-
 .book-card {
-    min-height: 120px;
+    position: relative;
 
-    padding: 12px 8px;
+    min-height: 155px;
 
-    border:
-        1px solid #c4a865;
+    padding: 20px 12px;
 
-    background:
-        rgba(255,250,235,.7);
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
 
     text-align: center;
 
-    transition: .2s;
-}
+    border:
+        1px solid
+        rgba(
+            214,
+            174,
+            82,
+            0.22
+        );
 
+    border-radius: 5px;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
 
 .book-card.unlocked {
     cursor: pointer;
@@ -457,147 +1005,747 @@ body::before {
     background:
         linear-gradient(
             145deg,
-            #fffdf6,
-            #f1e2c0
+            rgba(
+                62,
+                13,
+                25,
+                0.85
+            ),
+            rgba(
+                13,
+                19,
+                35,
+                0.95
+            )
         );
 }
 
-
 .book-card.unlocked:hover {
     transform:
-        translateY(-5px);
+        translateY(-6px);
+
+    border-color:
+        rgba(
+            214,
+            174,
+            82,
+            0.7
+        );
 
     box-shadow:
-        0 8px 20px
-        rgba(60,40,15,.2);
-}
+        0 15px 35px
+        rgba(
+            0,
+            0,
+            0,
+            0.4
+        ),
 
+        0 0 25px
+        rgba(
+            214,
+            174,
+            82,
+            0.1
+        );
+}
 
 .book-card.locked {
-    opacity: .6;
-}
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.025
+        );
 
+    opacity: 0.4;
+}
 
 .book-number {
-    color: #9a8b6c;
+    margin-bottom: 12px;
+
+    color:
+        var(--gold);
 
     font-size: 10px;
+
+    letter-spacing:
+        0.15em;
 }
 
-
 .book-fortune {
-    margin:
-        9px
-        0;
+    margin-bottom: 8px;
 
-    color: #a32626;
+    color:
+        var(--gold-light);
 
-    font-size: 17px;
+    font-size: 15px;
 
     font-weight: bold;
 }
 
-
 .book-author {
-    overflow: hidden;
-
-    white-space: nowrap;
-
-    text-overflow: ellipsis;
-
-    color: #66553e;
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.6
+        );
 
     font-size: 11px;
 }
 
-
 .lock {
-    margin-top: 18px;
+    margin-bottom: 8px;
 
-    color: #aaa18e;
+    font-size: 27px;
 
-    font-size: 24px;
+    opacity: 0.55;
 }
 
 
-/* =========================
-   モーダル
-========================= */
+/* =========================================================
+   シークレット図鑑
+========================================================= */
 
-.modal {
+.book-card.secret-card {
+    border-color:
+        rgba(
+            139,
+            92,
+            246,
+            0.6
+        );
+
+    box-shadow:
+        0 0 20px
+        rgba(
+            139,
+            92,
+            246,
+            0.15
+        );
+
+    animation:
+        secretCardGlow
+        2s ease-in-out infinite alternate;
+}
+
+@keyframes secretCardGlow {
+
+    from {
+        box-shadow:
+            0 0 10px
+            rgba(
+                139,
+                92,
+                246,
+                0.12
+            );
+    }
+
+    to {
+        box-shadow:
+            0 0 28px
+            rgba(
+                139,
+                92,
+                246,
+                0.3
+            );
+    }
+}
+
+
+/* =========================================================
+   設定ボタン
+========================================================= */
+
+#settingsButton {
+    position: fixed;
+
+    right: 25px;
+    bottom: 25px;
+
+    z-index: 900;
+
+    width: 60px;
+    height: 60px;
+
+    border:
+        1px solid
+        var(--gold);
+
+    border-radius: 50%;
+
+    background:
+        rgba(
+            10,
+            13,
+            24,
+            0.95
+        );
+
+    color:
+        var(--gold-light);
+
+    font-size: 23px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 30px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        ),
+
+        0 0 20px
+        rgba(
+            214,
+            174,
+            82,
+            0.12
+        );
+
+    transition:
+        transform 0.25s ease;
+}
+
+#settingsButton:hover {
+    transform:
+        rotate(30deg)
+        scale(1.08);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+#modal,
+#settingsModal {
     position: fixed;
 
     inset: 0;
 
-    z-index: 100;
+    z-index: 1000;
 
-    display: none;
+    display: flex;
 
-    align-items: center;
+    justify-content:
+        center;
 
-    justify-content: center;
+    align-items:
+        center;
 
     padding: 20px;
-}
-
-
-.modal.open {
-    display: flex;
-}
-
-
-.modal-bg {
-    position: absolute;
-
-    inset: 0;
 
     background:
-        rgba(25,15,8,.72);
+        rgba(
+            0,
+            0,
+            0,
+            0.8
+        );
 
     backdrop-filter:
-        blur(6px);
+        blur(9px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+#modal.open,
+#settingsModal.open {
+    opacity: 1;
+
+    visibility: visible;
 }
 
 
-.modal-card {
+/* =========================================================
+   MODAL CONTENT
+========================================================= */
+
+.modal-content {
     position: relative;
 
-    z-index: 2;
+    width:
+        min(
+            720px,
+            100%
+        );
 
-    width: min(95%, 600px);
+    max-height: 90vh;
+
+    overflow-y: auto;
 
     padding:
-        45px
-        30px;
+        45px 30px;
+
+    border:
+        1px solid
+        var(--gold);
 
     background:
         linear-gradient(
             145deg,
-            #fffef8,
-            #f2e2bd
+            #171322,
+            #080d19
         );
 
-    border:
-        2px solid #b18a3b;
-
     box-shadow:
-        0 25px 70px
-        rgba(0,0,0,.45);
+        0 30px 90px
+        rgba(
+            0,
+            0,
+            0,
+            0.75
+        ),
+
+        0 0 45px
+        rgba(
+            214,
+            174,
+            82,
+            0.08
+        );
+}
+
+.modal-content h2 {
+    margin-bottom: 30px;
 
     text-align: center;
 
-    animation:
-        modalOpen .25s ease;
+    color:
+        var(--gold-light);
+
+    font-size: 25px;
+
+    letter-spacing:
+        0.2em;
+}
+
+#closeModal,
+#closeSettings {
+    position: absolute;
+
+    top: 13px;
+    right: 17px;
+
+    border: none;
+
+    background: none;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.7
+        );
+
+    font-size: 28px;
+
+    cursor: pointer;
 }
 
 
-@keyframes modalOpen {
+/* =========================================================
+   名言詳細
+========================================================= */
+
+#modalFortune {
+    margin-bottom: 25px;
+
+    text-align: center;
+
+    color:
+        var(--gold);
+
+    font-size: 27px;
+
+    font-weight: bold;
+}
+
+#modalQuote {
+    color:
+        var(--text);
+
+    font-size: 22px;
+
+    line-height: 2;
+
+    text-align: center;
+}
+
+#modalAuthor {
+    margin-top: 20px;
+
+    text-align: center;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.7
+        );
+}
+
+#modalSource {
+    margin-top: 20px;
+
+    text-align: center;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.38
+        );
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   設定画面
+========================================================= */
+
+#messageInputs {
+    display: flex;
+
+    flex-direction:
+        column;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+.message-row {
+    display: flex;
+
+    gap: 8px;
+}
+
+.message-row input {
+    flex: 1;
+
+    min-width: 0;
+
+    padding:
+        12px 15px;
+
+    border:
+        1px solid
+        rgba(
+            214,
+            174,
+            82,
+            0.3
+        );
+
+    border-radius: 3px;
+
+    outline: none;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.06
+        );
+
+    color:
+        white;
+
+    font-family:
+        inherit;
+}
+
+.message-row input:focus {
+    border-color:
+        var(--gold);
+
+    box-shadow:
+        0 0 12px
+        rgba(
+            214,
+            174,
+            82,
+            0.1
+        );
+}
+
+.delete-message {
+    width: 42px;
+
+    border:
+        1px solid
+        rgba(
+            182,
+            42,
+            59,
+            0.6
+        );
+
+    background:
+        rgba(
+            143,
+            23,
+            39,
+            0.25
+        );
+
+    color:
+        #ffb6bd;
+
+    cursor: pointer;
+}
+
+#addMessage,
+#saveSettings {
+    padding:
+        12px 20px;
+
+    border:
+        1px solid
+        var(--gold);
+
+    color:
+        var(--gold-light);
+
+    background:
+        rgba(
+            214,
+            174,
+            82,
+            0.08
+        );
+
+    font-family:
+        inherit;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease;
+}
+
+#addMessage:hover {
+    background:
+        rgba(
+            214,
+            174,
+            82,
+            0.16
+        );
+}
+
+#saveSettings {
+    background:
+        linear-gradient(
+            135deg,
+            #761321,
+            #a91e31
+        );
+}
+
+
+/* =========================================================
+   神聖な御神籤演出
+========================================================= */
+
+#divineOverlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 3000;
+
+    display: flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    overflow: hidden;
+
+    background:
+        rgba(
+            3,
+            5,
+            12,
+            0.97
+        );
+
+    opacity: 0;
+
+    transition:
+        opacity 0.5s ease;
+}
+
+#divineOverlay.active {
+    opacity: 1;
+}
+
+#divineOverlay.fade {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   中央の光
+========================================================= */
+
+.divine-light {
+    position: absolute;
+
+    width: 250px;
+    height: 250px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(
+                255,
+                235,
+                161,
+                0.8
+            ),
+            rgba(
+                214,
+                174,
+                82,
+                0.2
+            ) 35%,
+            transparent 70%
+        );
+
+    filter:
+        blur(3px);
+
+    animation:
+        divineLight
+        1.5s ease-in-out
+        infinite alternate;
+}
+
+@keyframes divineLight {
+
+    from {
+        transform:
+            scale(0.7);
+
+        opacity: 0.45;
+    }
+
+    to {
+        transform:
+            scale(1.35);
+
+        opacity: 0.95;
+    }
+}
+
+
+/* =========================================================
+   神聖な文字
+========================================================= */
+
+.divine-text {
+    position: relative;
+
+    z-index: 2;
+
+    text-align: center;
+
+    color:
+        var(--gold-light);
+
+    font-size: 22px;
+
+    letter-spacing:
+        0.35em;
+
+    text-shadow:
+        0 0 20px
+        rgba(
+            255,
+            231,
+            160,
+            0.8
+        );
+
+    animation:
+        divineText
+        1.4s ease;
+}
+
+.divine-text small {
+    display: block;
+
+    margin-top: 15px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.55
+        );
+
+    font-size: 11px;
+
+    letter-spacing:
+        0.2em;
+}
+
+.divine-torii {
+    margin-bottom: 20px;
+
+    color:
+        var(--red-light);
+
+    font-size: 65px;
+
+    filter:
+        drop-shadow(
+            0 0 20px
+            rgba(
+                214,
+                174,
+                82,
+                0.5
+            )
+        );
+}
+
+@keyframes divineText {
 
     from {
         opacity: 0;
 
         transform:
-            scale(.9);
+            scale(0.85);
     }
 
     to {
@@ -609,145 +1757,508 @@ body::before {
 }
 
 
-.close {
+/* =========================================================
+   光の粒
+========================================================= */
+
+.divine-particle {
     position: absolute;
 
-    right: 12px;
-    top: 8px;
+    color:
+        var(--gold-light);
 
-    border: none;
+    font-size: 20px;
 
-    background: transparent;
+    opacity: 0;
 
-    color: #711d1d;
+    text-shadow:
+        0 0 15px
+        var(--gold-light);
 
-    font-size: 32px;
+    animation:
+        particleFloat
+        1.4s ease
+        infinite;
+}
 
-    cursor: pointer;
+.p1 {
+    top: 20%;
+    left: 30%;
+}
+
+.p2 {
+    top: 30%;
+    right: 25%;
+}
+
+.p3 {
+    bottom: 25%;
+    left: 25%;
+}
+
+.p4 {
+    bottom: 20%;
+    right: 30%;
+}
+
+.p5 {
+    top: 15%;
+    left: 50%;
+}
+
+@keyframes particleFloat {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translateY(30px)
+            scale(0.5);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translateY(-80px)
+            scale(1.2);
+    }
 }
 
 
-.modal-title {
-    color: #a4863b;
+/* =========================================================
+   レアリティ演出
+========================================================= */
 
-    font-size: 10px;
+#rarityEffect {
+    position: fixed;
 
-    letter-spacing: 4px;
-}
+    inset: 0;
 
+    z-index: 2500;
 
-.modal-fortune {
-    margin:
-        20px
-        0;
+    display: flex;
 
-    color: #a32626;
+    flex-direction: column;
 
-    font-size: 35px;
+    justify-content: center;
 
-    font-weight: bold;
-}
-
-
-.modal-quote {
-    font-size: 22px;
-
-    font-weight: bold;
-
-    line-height: 1.9;
-}
-
-
-.modal-author {
-    margin-top: 22px;
-
-    color: #594a36;
-
-    font-size: 18px;
-
-    font-weight: bold;
-}
-
-
-.modal-source {
-    margin-top: 14px;
-
-    color: #887a62;
-
-    font-size: 12px;
-}
-
-
-/* =========================
-   フッター
-========================= */
-
-footer {
-    margin-top: 45px;
+    align-items: center;
 
     text-align: center;
 
-    color: #796c55;
+    pointer-events: none;
 
-    font-size: 12px;
+    opacity: 0;
 
-    letter-spacing: 3px;
+    transition:
+        opacity 0.5s ease;
+}
+
+#rarityEffect.show {
+    opacity: 1;
+}
+
+.effect-symbol {
+    margin-bottom: 20px;
+
+    font-size: 70px;
+}
+
+.effect-text {
+    font-size:
+        clamp(
+            35px,
+            8vw,
+            70px
+        );
+
+    font-weight: bold;
+
+    letter-spacing:
+        0.25em;
 }
 
 
-/* =========================
-   スマホ
-========================= */
+/* =========================================================
+   大大吉
+========================================================= */
+
+.rarity-effect.gold {
+    background:
+        radial-gradient(
+            circle,
+            rgba(
+                255,
+                220,
+                120,
+                0.18
+            ),
+            rgba(
+                0,
+                0,
+                0,
+                0.7
+            ) 55%
+        );
+}
+
+.rarity-effect.gold .effect-symbol,
+.rarity-effect.gold .effect-text {
+    color:
+        #ffe49a;
+
+    text-shadow:
+        0 0 20px
+        rgba(
+            255,
+            218,
+            105,
+            0.9
+        ),
+
+        0 0 50px
+        rgba(
+            214,
+            174,
+            82,
+            0.6
+        );
+}
+
+
+/* =========================================================
+   スーパー大吉
+========================================================= */
+
+.rarity-effect.super {
+    background:
+        radial-gradient(
+            circle,
+            rgba(
+                255,
+                240,
+                160,
+                0.25
+            ),
+            rgba(
+                105,
+                40,
+                10,
+                0.2
+            ),
+            rgba(
+                0,
+                0,
+                0,
+                0.8
+            ) 70%
+        );
+}
+
+.rarity-effect.super .effect-symbol,
+.rarity-effect.super .effect-text {
+    color:
+        #fff0a8;
+
+    text-shadow:
+        0 0 20px
+        #ffe27c,
+
+        0 0 55px
+        #d6ae52;
+}
+
+.rarity-effect.super .effect-text {
+    animation:
+        superText
+        1.5s ease
+        infinite alternate;
+}
+
+@keyframes superText {
+
+    from {
+        transform:
+            scale(0.95);
+    }
+
+    to {
+        transform:
+            scale(1.05);
+    }
+}
+
+
+/* =========================================================
+   シークレット
+========================================================= */
+
+.rarity-effect.secret {
+    background:
+        radial-gradient(
+            circle,
+            rgba(
+                113,
+                67,
+                190,
+                0.28
+            ),
+            rgba(
+                15,
+                7,
+                30,
+                0.92
+            ) 65%
+        );
+}
+
+.rarity-effect.secret .effect-symbol,
+.rarity-effect.secret .effect-text {
+    color:
+        #d9b9ff;
+
+    text-shadow:
+        0 0 20px
+        rgba(
+            170,
+            100,
+            255,
+            0.9
+        ),
+
+        0 0 55px
+        rgba(
+            110,
+            60,
+            200,
+            0.7
+        );
+}
+
+.rarity-effect.secret small {
+    margin-top: 18px;
+
+    color:
+        rgba(
+            230,
+            210,
+            255,
+            0.7
+        );
+
+    font-size: 14px;
+
+    letter-spacing:
+        0.15em;
+}
+
+
+/* =========================================================
+   図鑑登録通知
+========================================================= */
+
+.collection-effect {
+    position: fixed;
+
+    left: 50%;
+    bottom: 35px;
+
+    z-index: 2800;
+
+    transform:
+        translate(
+            -50%,
+            30px
+        );
+
+    padding:
+        13px 25px;
+
+    border:
+        1px solid
+        var(--gold);
+
+    color:
+        var(--gold-light);
+
+    background:
+        rgba(
+            10,
+            12,
+            23,
+            0.95
+        );
+
+    box-shadow:
+        0 10px 35px
+        rgba(
+            0,
+            0,
+            0,
+            0.5
+        ),
+
+        0 0 20px
+        rgba(
+            214,
+            174,
+            82,
+            0.15
+        );
+
+    opacity: 0;
+
+    transition:
+        opacity 0.4s ease,
+        transform 0.4s ease;
+}
+
+.collection-effect.show {
+    opacity: 1;
+
+    transform:
+        translate(
+            -50%,
+            0
+        );
+}
+
+
+/* =========================================================
+   スクロールバー
+========================================================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background:
+        #05070e;
+}
+
+::-webkit-scrollbar-thumb {
+    background:
+        #681321;
+
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        var(--gold);
+}
+
+
+/* =========================================================
+   スマートフォン
+========================================================= */
 
 @media (max-width: 700px) {
 
-    .header h1 {
-        font-size: 32px;
-
-        letter-spacing: 7px;
+    header {
+        padding:
+            30px 15px;
     }
 
-    .torii {
-        font-size: 50px;
+    header h1 {
+        letter-spacing:
+            0.1em;
     }
 
-    .paper {
+    main {
+        padding:
+            30px 0
+            80px;
+    }
+
+    .omikuji-area {
+        padding:
+            30px 15px
+            40px;
+    }
+
+    .result {
         min-height: 330px;
 
         padding:
-            30px
-            18px;
+            40px 18px;
     }
 
-    #fortune {
-        font-size: 43px;
+    #drawButton {
+        width: 100%;
+
+        min-width: 0;
     }
 
-    #quote {
-        font-size: 18px;
-    }
-
-    .book-grid {
+    #bookGrid {
         grid-template-columns:
-            repeat(3, 1fr);
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+    .book-card {
+        min-height: 140px;
+    }
+
+    #settingsButton {
+        right: 15px;
+        bottom: 15px;
+
+        width: 55px;
+        height: 55px;
+    }
+
+    .divine-text {
+        font-size: 17px;
+    }
+
+    .divine-torii {
+        font-size: 52px;
+    }
+
+    #modalQuote {
+        font-size: 18px;
     }
 }
 
 
-@media (max-width: 450px) {
+/* =========================================================
+   小さいスマホ
+========================================================= */
 
-    .book-grid {
+@media (max-width: 420px) {
+
+    #bookGrid {
         grid-template-columns:
-            repeat(2, 1fr);
+            repeat(
+                2,
+                1fr
+            );
+
+        gap: 10px;
     }
 
-    .modal-card {
-        padding:
-            40px
-            18px;
+    .book-card {
+        padding: 15px 8px;
     }
 
-    .modal-quote {
-        font-size: 18px;
+    .book-fortune {
+        font-size: 13px;
+    }
+
+    .book-author {
+        font-size: 10px;
+    }
+
+    .achievement {
+        padding: 18px;
     }
 }

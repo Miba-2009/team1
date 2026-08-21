@@ -1,1169 +1,2035 @@
+/* =========================================================
+   学びの御神籤 - script.js 完成版
+   ・100種類の御神籤
+   ・日本語の名言＋偉人名
+   ・シークレット対応
+   ・御神籤図鑑
+   ・達成率
+   ・通常クールタイム30分
+   ・重複時はクールタイム25分
+   ・重複ボーナス表示
+   ・応援メッセージはクールタイム中ずっと固定
+   ・本日の課題もクールタイム中ずっと固定
+   ・設定から応援メッセージを登録可能
+========================================================= */
+
 "use strict";
 
-/* =====================================================
-   名言100種類
-===================================================== */
 
-const quotes = [
+/* =========================================================
+   基本設定
+========================================================= */
 
-    {
-        id: 1,
-        fortune: "大大吉",
-        quote: "千里の道も一歩から。",
-        author: "老子",
-        source: "『道徳経』"
-    },
-    {
-        id: 2,
-        fortune: "大吉",
-        quote: "よく行うことは、よく語ることに勝る。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 3,
-        fortune: "大吉",
-        quote: "知識への投資は、いつでも最高の利息を生む。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 4,
-        fortune: "大大吉",
-        quote: "あなたが遅れても、時間は待ってくれない。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 5,
-        fortune: "中吉",
-        quote: "努力と粘り強さは、あらゆるものを乗り越える。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 6,
-        fortune: "大吉",
-        quote: "失われた時間は、二度と取り戻せない。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 7,
-        fortune: "吉",
-        quote: "忍耐できる者は、望むものを手にすることができる。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 8,
-        fortune: "大吉",
-        quote: "準備を怠ることは、失敗への準備をすることである。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 9,
-        fortune: "大大吉",
-        quote: "読む価値のあるものを書くか、書く価値のあることを行え。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
-    {
-        id: 10,
-        fortune: "吉",
-        quote: "勤勉は幸運の母である。",
-        author: "ベンジャミン・フランクリン",
-        source: "Benjamin Franklin"
-    },
+// 通常クールタイム：30分
+const COOLDOWN_TIME = 30 * 60 * 1000;
 
-    {
-        id: 11,
-        fortune: "大吉",
-        quote: "明日を実現するための最大の障害は、今日の疑いである。",
-        author: "フランクリン・D・ルーズベルト",
-        source: "就任演説"
-    },
-    {
-        id: 12,
-        fortune: "大吉",
-        quote: "私たちが恐れるべき唯一のものは、恐怖そのものである。",
-        author: "フランクリン・D・ルーズベルト",
-        source: "就任演説"
-    },
-    {
-        id: 13,
-        fortune: "大大吉",
-        quote: "幸福とは、達成する喜びと創造する努力のスリルの中にある。",
-        author: "フランクリン・D・ルーズベルト",
-        source: "Franklin D. Roosevelt"
-    },
-    {
-        id: 14,
-        fortune: "中吉",
-        quote: "人間と自然は、手を取り合って働かなければならない。",
-        author: "フランクリン・D・ルーズベルト",
-        source: "Franklin D. Roosevelt"
-    },
-    {
-        id: 15,
-        fortune: "吉",
-        quote: "自己利益に心を奪われると、美徳は海に流れ込む川のように失われていく。",
-        author: "フランクリン・D・ルーズベルト",
-        source: "Franklin D. Roosevelt"
-    },
+// 重複時クールタイム：25分
+const DUPLICATE_COOLDOWN_TIME = 25 * 60 * 1000;
 
-    {
-        id: 16,
-        fortune: "大吉",
-        quote: "自分の心が正しいと思うことを行いなさい。",
-        author: "エレノア・ルーズベルト",
-        source: "Eleanor Roosevelt"
-    },
-    {
-        id: 17,
-        fortune: "大大吉",
-        quote: "自分にはできないと思うことを、やってみなさい。",
-        author: "エレノア・ルーズベルト",
-        source: "Eleanor Roosevelt"
-    },
-    {
-        id: 18,
-        fortune: "大吉",
-        quote: "未来は、自分の夢の美しさを信じる人のものである。",
-        author: "エレノア・ルーズベルト",
-        source: "Eleanor Roosevelt"
-    },
-    {
-        id: 19,
-        fortune: "中吉",
-        quote: "あなたの許可なしに、誰もあなたを劣った人間だと思わせることはできない。",
-        author: "エレノア・ルーズベルト",
-        source: "Eleanor Roosevelt"
-    },
-    {
-        id: 20,
-        fortune: "吉",
-        quote: "暗闇を呪うより、一本のろうそくに火を灯そう。",
-        author: "エレノア・ルーズベルト",
-        source: "広く帰属されている言葉"
-    },
 
-    {
-        id: 21,
-        fortune: "大吉",
-        quote: "何事も、成し遂げるまでは不可能に見える。",
-        author: "ネルソン・マンデラ",
-        source: "Nelson Mandela"
-    },
-    {
-        id: 22,
-        fortune: "大大吉",
-        quote: "教育は、世界を変えるために使える最も強力な武器である。",
-        author: "ネルソン・マンデラ",
-        source: "2003年の講演"
-    },
-    {
-        id: 23,
-        fortune: "大吉",
-        quote: "勝者とは、決してあきらめない夢見る人である。",
-        author: "ネルソン・マンデラ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 24,
-        fortune: "中吉",
-        quote: "大きな山を登り終えたとき、そこにはさらに多くの山があることに気づく。",
-        author: "ネルソン・マンデラ",
-        source: "『自由への長い道』"
-    },
-    {
-        id: 25,
-        fortune: "吉",
-        quote: "より良い世界をつくることは、あなた自身の手に委ねられている。",
-        author: "ネルソン・マンデラ",
-        source: "Nelson Mandela"
-    },
-    {
-        id: 26,
-        fortune: "大吉",
-        quote: "人生の最大の栄光は、一度も倒れないことではなく、倒れるたびに立ち上がることにある。",
-        author: "ネルソン・マンデラ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 27,
-        fortune: "大大吉",
-        quote: "人は大きな困難を乗り越えることで、さらに強くなる。",
-        author: "ネルソン・マンデラ",
-        source: "『自由への長い道』"
-    },
+// localStorage
+const STORAGE_COLLECTION = "studyOmikujiCollection";
+const STORAGE_LAST_DRAW = "studyOmikujiLastDraw";
+const STORAGE_COOLDOWN_DURATION = "studyOmikujiCooldownDuration";
 
-    {
-        id: 28,
-        fortune: "大吉",
-        quote: "私は失敗していない。うまくいかない方法を一万通り見つけただけだ。",
-        author: "トーマス・エジソン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 29,
-        fortune: "大大吉",
-        quote: "多くの人がチャンスを逃すのは、それが仕事の姿をしているからだ。",
-        author: "トーマス・エジソン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 30,
-        fortune: "中吉",
-        quote: "天才とは、1パーセントのひらめきと99パーセントの努力である。",
-        author: "トーマス・エジソン",
-        source: "広く知られるエジソンの言葉"
-    },
-    {
-        id: 31,
-        fortune: "大吉",
-        quote: "私たちの最大の弱点は、あきらめてしまうことにある。",
-        author: "トーマス・エジソン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 32,
-        fortune: "吉",
-        quote: "多くの失敗者は、あきらめたとき成功まであと少しだったことに気づかなかった。",
-        author: "トーマス・エジソン",
-        source: "広く帰属されている言葉"
-    },
+const STORAGE_MESSAGES = "studyOmikujiMessages";
+const STORAGE_CHALLENGE = "studyOmikujiChallenge";
+const STORAGE_SUPPORT = "studyOmikujiCurrentSupport";
 
-    {
-        id: 33,
-        fortune: "大大吉",
-        quote: "始める方法は、話すことをやめて行動することだ。",
-        author: "ウォルト・ディズニー",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 34,
-        fortune: "大吉",
-        quote: "勇気を持って追いかければ、すべての夢は実現できる。",
-        author: "ウォルト・ディズニー",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 35,
-        fortune: "大吉",
-        quote: "夢見ることができるなら、それを実現することもできる。",
-        author: "ウォルト・ディズニー",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 36,
-        fortune: "中吉",
-        quote: "笑いに時代はなく、想像力に年齢はなく、夢は永遠である。",
-        author: "ウォルト・ディズニー",
-        source: "Walt Disney"
-    },
 
-    {
-        id: 37,
-        fortune: "大吉",
-        quote: "成功への秘訣は、まず始めることだ。",
-        author: "マーク・トウェイン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 38,
-        fortune: "吉",
-        quote: "成功の秘訣は、自分の仕事を楽しみに変えることだ。",
-        author: "マーク・トウェイン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 39,
-        fortune: "中吉",
-        quote: "年齢とは心の問題である。気にしなければ問題ではない。",
-        author: "マーク・トウェイン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 40,
-        fortune: "吉",
-        quote: "遅れた完璧さより、継続的な改善のほうが優れている。",
-        author: "マーク・トウェイン",
-        source: "広く帰属されている言葉"
-    },
+/* =========================================================
+   デフォルト応援メッセージ
+========================================================= */
 
-    {
-        id: 41,
-        fortune: "大大吉",
-        quote: "なりたかった自分になるのに、遅すぎることはない。",
-        author: "ジョージ・エリオット",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 42,
-        fortune: "大吉",
-        quote: "自分がなりたかった人になるのに、遅すぎることはない。",
-        author: "ジョージ・エリオット",
-        source: "広く帰属されている言葉"
-    },
+const defaultSupportMessages = [
 
-    {
-        id: 43,
-        fortune: "大吉",
-        quote: "あなたが何者であれ、最高の自分でありなさい。",
-        author: "エイブラハム・リンカーン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 44,
-        fortune: "大大吉",
-        quote: "準備をしておこう。いつかチャンスがやってくる。",
-        author: "エイブラハム・リンカーン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 45,
-        fortune: "大吉",
-        quote: "木を切り倒すのに6時間あるなら、最初の4時間を斧を研ぐことに使う。",
-        author: "エイブラハム・リンカーン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 46,
-        fortune: "中吉",
-        quote: "大切なのは失敗したかどうかではなく、その失敗に満足しているかどうかだ。",
-        author: "エイブラハム・リンカーン",
-        source: "広く帰属されている言葉"
-    },
+    "今日の努力は、未来の自分へのプレゼントです。",
 
-    {
-        id: 47,
-        fortune: "大吉",
-        quote: "未来を予測する最善の方法は、自分で未来をつくることだ。",
-        author: "ピーター・ドラッカー",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 48,
-        fortune: "大吉",
-        quote: "知識は常に改善され、挑戦され、増やされなければ消えていく。",
-        author: "ピーター・ドラッカー",
-        source: "『マネジメント』"
-    },
+    "少しだけでも大丈夫。まずは一問から始めよう。",
 
-    {
-        id: 49,
-        fortune: "大大吉",
-        quote: "人に何かを教えることはできない。ただ、その人自身の中から見つける手助けができるだけだ。",
-        author: "ガリレオ・ガリレイ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 50,
-        fortune: "大吉",
-        quote: "測れるものは測り、測れないものも測れるようにしなさい。",
-        author: "ガリレオ・ガリレイ",
-        source: "広く帰属されている言葉"
-    },
+    "昨日の自分より、一歩前に進めば十分です。",
 
-    {
-        id: 51,
-        fortune: "大吉",
-        quote: "人生において恐れるものは何もない。理解すべきものがあるだけだ。",
-        author: "マリー・キュリー",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 52,
-        fortune: "大大吉",
-        quote: "私たちは、自分には何かに恵まれた才能があると信じなければならない。",
-        author: "マリー・キュリー",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 53,
-        fortune: "中吉",
-        quote: "人への好奇心を減らし、考えやアイデアへの好奇心を増やしなさい。",
-        author: "マリー・キュリー",
-        source: "広く帰属されている言葉"
-    },
+    "分からない問題があるのは、成長するチャンスです。",
 
-    {
-        id: 54,
-        fortune: "大吉",
-        quote: "大切なのは、疑問を持ち続けることだ。",
-        author: "アルベルト・アインシュタイン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 55,
-        fortune: "大大吉",
-        quote: "人生は自転車に乗るようなものだ。バランスを保つには、動き続けなければならない。",
-        author: "アルベルト・アインシュタイン",
-        source: "1930年の手紙"
-    },
-    {
-        id: 56,
-        fortune: "大吉",
-        quote: "想像力は知識よりも重要である。",
-        author: "アルベルト・アインシュタイン",
-        source: "1929年のインタビュー"
-    },
-    {
-        id: 57,
-        fortune: "吉",
-        quote: "一度も失敗したことがない人は、新しいことを何も試していない人だ。",
-        author: "アルベルト・アインシュタイン",
-        source: "広く帰属されている言葉"
-    },
+    "焦らなくて大丈夫。自分のペースで進もう。",
 
-    {
-        id: 58,
-        fortune: "大吉",
-        quote: "情熱なしに偉大なことは何も成し遂げられなかった。",
-        author: "ラルフ・ワルド・エマーソン",
-        source: "エッセイ"
-    },
-    {
-        id: 59,
-        fortune: "大大吉",
-        quote: "私たちの内側にあるものに比べれば、過去も未来も小さな問題にすぎない。",
-        author: "ラルフ・ワルド・エマーソン",
-        source: "Ralph Waldo Emerson"
-    },
-    {
-        id: 60,
-        fortune: "中吉",
-        quote: "あなたがなるべき人とは、自分自身で決めた人である。",
-        author: "ラルフ・ワルド・エマーソン",
-        source: "広く帰属されている言葉"
-    },
+    "5分だけ頑張ってみよう。その一歩が大切です。",
 
-    {
-        id: 61,
-        fortune: "大吉",
-        quote: "道があるところへ行くのではなく、道のないところへ行き、道を残しなさい。",
-        author: "ラルフ・ワルド・エマーソン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 62,
-        fortune: "吉",
-        quote: "決断した瞬間から、世界はその実現に向けて動き始める。",
-        author: "ラルフ・ワルド・エマーソン",
-        source: "広く帰属されている言葉"
-    },
+    "勉強した分だけ、できることは少しずつ増えていきます。",
 
-    {
-        id: 63,
-        fortune: "大大吉",
-        quote: "挑戦する者に、不可能なことはない。",
-        author: "アレクサンドロス大王",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 64,
-        fortune: "大吉",
-        quote: "幸運は勇者に味方する。",
-        author: "ウェルギリウス",
-        source: "『アエネーイス』"
-    },
-    {
-        id: 65,
-        fortune: "吉",
-        quote: "できると信じる者こそ、勝利することができる。",
-        author: "ウェルギリウス",
-        source: "『アエネーイス』"
-    },
+    "今日ここまで頑張った自分を、ちゃんと褒めてあげよう。",
 
-    {
-        id: 66,
-        fortune: "大吉",
-        quote: "賽は投げられた。",
-        author: "ユリウス・カエサル",
-        source: "スエトニウス『皇帝伝』"
-    },
-    {
-        id: 67,
-        fortune: "大大吉",
-        quote: "来た、見た、勝った。",
-        author: "ユリウス・カエサル",
-        source: "プルタルコス『英雄伝』"
-    },
+    "完璧じゃなくて大丈夫。続けることが一番大切です。",
 
-    {
-        id: 68,
-        fortune: "大吉",
-        quote: "心がすべてである。あなたは自分が考えたものになる。",
-        author: "ブッダ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 69,
-        fortune: "中吉",
-        quote: "私たちは、自分が考えたものになる。",
-        author: "ブッダ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 70,
-        fortune: "大吉",
-        quote: "人生は心によって形づくられる。私たちは思った通りの人間になる。",
-        author: "ブッダ",
-        source: "『法句経』の伝統"
-    },
+    "未来の自分が、今日のあなたにきっと感謝します。",
 
-    {
-        id: 71,
-        fortune: "大大吉",
-        quote: "旅そのものが、人生の報酬である。",
-        author: "スティーブ・ジョブズ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 72,
-        fortune: "大吉",
-        quote: "ハングリーであれ。愚か者であれ。",
-        author: "スティーブ・ジョブズ",
-        source: "2005年スタンフォード大学卒業式"
-    },
-    {
-        id: 73,
-        fortune: "大大吉",
-        quote: "あなたの時間は限られている。他人の人生を生きるために時間を使ってはいけない。",
-        author: "スティーブ・ジョブズ",
-        source: "2005年スタンフォード大学卒業式"
-    },
-    {
-        id: 74,
-        fortune: "大吉",
-        quote: "何かを信じなければならない。",
-        author: "スティーブ・ジョブズ",
-        source: "2005年スタンフォード大学卒業式"
-    },
-    {
-        id: 75,
-        fortune: "中吉",
-        quote: "自分が本当に愛せるものを見つけなければならない。",
-        author: "スティーブ・ジョブズ",
-        source: "2005年スタンフォード大学卒業式"
-    },
+    "一問解けば、一歩前進。",
 
-    {
-        id: 76,
-        fortune: "大吉",
-        quote: "何もしなければ、何も成し遂げられない。",
-        author: "マヤ・アンジェロウ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 77,
-        fortune: "大大吉",
-        quote: "創造性は使い切ることができない。使えば使うほど増えていく。",
-        author: "マヤ・アンジェロウ",
-        source: "Maya Angelou"
-    },
+    "できないことより、できるようになったことを見つけよう。",
 
-    {
-        id: 78,
-        fortune: "大吉",
-        quote: "成功は終わりではなく、失敗は終わりでもない。大切なのは続ける勇気だ。",
-        author: "ウィンストン・チャーチル",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 79,
-        fortune: "大大吉",
-        quote: "地獄を通っているなら、そのまま進み続けなさい。",
-        author: "ウィンストン・チャーチル",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 80,
-        fortune: "大吉",
-        quote: "決して、決して、決してあきらめるな。",
-        author: "ウィンストン・チャーチル",
-        source: "1941年の演説"
-    },
+    "今日の10分が、明日の自信になります。",
 
-    {
-        id: 81,
-        fortune: "大吉",
-        quote: "私たちは皆、どん底にいる。しかし、星を見上げている者もいる。",
-        author: "オスカー・ワイルド",
-        source: "『ウィンダミア卿夫人の扇』"
-    },
-    {
-        id: 82,
-        fortune: "中吉",
-        quote: "経験とは、私たちが失敗につける名前にすぎない。",
-        author: "オスカー・ワイルド",
-        source: "『ウィンダミア卿夫人の扇』"
-    },
+    "まず始める。それだけでも十分すごいことです。",
 
-    {
-        id: 83,
-        fortune: "大吉",
-        quote: "改善するとは変わること。完璧になるとは、何度も変わることだ。",
-        author: "ウィンストン・チャーチル",
-        source: "広く帰属されている言葉"
-    },
-
-    {
-        id: 84,
-        fortune: "大大吉",
-        quote: "一時間の時間を無駄にする人は、人生の価値をまだ理解していない。",
-        author: "チャールズ・ダーウィン",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 85,
-        fortune: "大吉",
-        quote: "生き残るのは最も強い種でも、最も賢い種でもない。変化に適応できる種である。",
-        author: "チャールズ・ダーウィン",
-        source: "広く帰属されている言葉"
-    },
-
-    {
-        id: 86,
-        fortune: "大吉",
-        quote: "もし私が遠くを見ることができたのなら、それは巨人の肩の上に立ったからだ。",
-        author: "アイザック・ニュートン",
-        source: "1675年のロバート・フックへの手紙"
-    },
-    {
-        id: 87,
-        fortune: "中吉",
-        quote: "真理は、常に単純さの中に見つかる。",
-        author: "アイザック・ニュートン",
-        source: "Isaac Newton"
-    },
-
-    {
-        id: 88,
-        fortune: "大大吉",
-        quote: "天才とは、永遠の忍耐である。",
-        author: "ミケランジェロ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 89,
-        fortune: "大吉",
-        quote: "多くの人にとって最大の危険は、目標が高すぎて失敗することではなく、目標が低すぎて達成してしまうことだ。",
-        author: "ミケランジェロ",
-        source: "広く帰属されている言葉"
-    },
-
-    {
-        id: 90,
-        fortune: "大吉",
-        quote: "シンプルさは究極の洗練である。",
-        author: "レオナルド・ダ・ヴィンチ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 91,
-        fortune: "大大吉",
-        quote: "学ぶことは、決して心を疲れさせない。",
-        author: "レオナルド・ダ・ヴィンチ",
-        source: "Leonardo da Vinci"
-    },
-    {
-        id: 92,
-        fortune: "中吉",
-        quote: "一つの星に心を定めた者は、その考えを簡単には変えない。",
-        author: "レオナルド・ダ・ヴィンチ",
-        source: "Leonardo da Vinci"
-    },
-
-    {
-        id: 93,
-        fortune: "大吉",
-        quote: "他人を知ることは知性であり、自分自身を知ることは本当の知恵である。",
-        author: "老子",
-        source: "『道徳経』"
-    },
-    {
-        id: 94,
-        fortune: "大大吉",
-        quote: "自分が何者であるかを手放したとき、自分がなり得るものになる。",
-        author: "老子",
-        source: "『道徳経』"
-    },
-
-    {
-        id: 95,
-        fortune: "大吉",
-        quote: "どれほどゆっくり進んでも、止まらなければよい。",
-        author: "孔子",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 96,
-        fortune: "大吉",
-        quote: "すべてのものには美しさがある。しかし、それを見つけられる人はすべてではない。",
-        author: "孔子",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 97,
-        fortune: "中吉",
-        quote: "学んでも考えなければ迷い、考えても学ばなければ危うい。",
-        author: "孔子",
-        source: "『論語』"
-    },
-    {
-        id: 98,
-        fortune: "大吉",
-        quote: "最大の栄光とは、一度も倒れないことではなく、倒れるたびに立ち上がることだ。",
-        author: "孔子",
-        source: "広く帰属されている言葉"
-    },
-
-    {
-        id: 99,
-        fortune: "大大吉",
-        quote: "知るだけでは十分ではない。実行しなければならない。望むだけでは十分ではない。行動しなければならない。",
-        author: "ヨハン・ヴォルフガング・フォン・ゲーテ",
-        source: "広く帰属されている言葉"
-    },
-    {
-        id: 100,
-        fortune: "スーパー大吉",
-        quote: "できること、夢見ることは、まず始めなさい。大胆さには天才と力と魔法が宿っている。",
-        author: "ヨハン・ヴォルフガング・フォン・ゲーテ",
-        source: "広く帰属されている言葉"
-    }
+    "休憩も大切。無理せず自分のペースで進もう。"
 
 ];
 
 
-/* =====================================================
-   HTML要素
-===================================================== */
+/* =========================================================
+   本日の課題
+========================================================= */
 
-const drawButton =
-    document.getElementById("drawButton");
+const challengeTasks = [
 
-const fortuneElement =
-    document.getElementById("fortune");
+    "英単語を10個覚える",
 
-const quoteElement =
-    document.getElementById("quote");
+    "数学の問題を3問解く",
 
-const authorElement =
-    document.getElementById("author");
+    "教科書を5ページ読む",
 
-const cooldownElement =
-    document.getElementById("cooldown");
+    "漢字を10個覚える",
 
-const bookGrid =
-    document.getElementById("bookGrid");
+    "昨日間違えた問題を3問解き直す",
 
-const countElement =
-    document.getElementById("count");
+    "英単語を15分勉強する",
 
-const modal =
-    document.getElementById("modal");
+    "数学を15分だけ進める",
 
-const closeModal =
-    document.getElementById("closeModal");
+    "国語の文章を1つ読む",
 
-const modalFortune =
-    document.getElementById("modalFortune");
+    "理科の重要語句を5個覚える",
 
-const modalQuote =
-    document.getElementById("modalQuote");
+    "社会の重要語句を5個覚える",
 
-const modalAuthor =
-    document.getElementById("modalAuthor");
+    "苦手な問題を1問だけ解いてみる",
 
-const modalSource =
-    document.getElementById("modalSource");
+    "学校の宿題を1つ終わらせる",
 
+    "ノートを10分見直す",
 
-/* =====================================================
-   図鑑データ
-===================================================== */
+    "今日習った内容を復習する",
 
-let collected =
-    JSON.parse(
-        localStorage.getItem(
-            "quoteCollection"
-        )
-    ) || [];
+    "明日の授業の予習を10分する",
 
+    "分からない問題を1つ調べる",
 
-/* =====================================================
-   クールタイム
-===================================================== */
+    "英語の文章を1つ音読する",
 
-let lastDraw =
-    Number(
-        localStorage.getItem(
-            "quoteLastDraw"
-        )
-    ) || 0;
+    "公式を3つ覚える",
 
-const COOLDOWN =
-    30 * 60 * 1000;
+    "テスト範囲を10分確認する",
+
+    "机に向かって15分集中する",
+
+    "数学の公式を1つ復習する",
+
+    "英単語を5個使って英文を作る",
+
+    "社会の年号を5個確認する",
+
+    "理科の用語を5個確認する",
+
+    "国語の漢字を5個練習する",
+
+    "今日の授業内容を3つ思い出す",
+
+    "苦手教科を10分だけ勉強する",
+
+    "問題集を2ページ進める",
+
+    "授業で分からなかったことを1つ確認する",
+
+    "明日の持ち物と宿題を確認する"
+
+];
 
 
-/* =====================================================
-   御神籤を引く
-===================================================== */
+/* =========================================================
+   名言データ
+========================================================= */
 
-drawButton.addEventListener(
-    "click",
-    function () {
+const quotes = [
 
-        const now =
-            Date.now();
+    ["千里の道も一歩から。", "老子", "大大吉", "『道徳経』"],
 
-        if (
-            now - lastDraw <
-            COOLDOWN
-        ) {
+    ["学びて時にこれを習う、また説ばしからずや。", "孔子", "大吉", "『論語』"],
 
-            updateCooldown();
+    ["知る者は好む者に如かず、好む者は楽しむ者に如かず。", "孔子", "大吉", "『論語』"],
 
-            return;
-        }
+    ["過ちて改めざる、これを過ちという。", "孔子", "大大吉", "『論語』"],
 
-        drawButton.disabled =
-            true;
+    ["己の欲せざる所、人に施すことなかれ。", "孔子", "中吉", "『論語』"],
 
-        drawButton.textContent =
-            "🎋　引いています…";
+    ["学びて思わざれば則ち罔し、思いて学ばざれば則ち殆し。", "孔子", "大吉", "『論語』"],
+
+    ["温故知新。", "孔子", "吉", "『論語』"],
+
+    ["知識への投資は、いつでも最高の利息を生む。", "ベンジャミン・フランクリン", "大吉", "広く知られる言葉"],
+
+    ["失われた時間は、二度と戻らない。", "ベンジャミン・フランクリン", "大吉", "広く帰属される言葉"],
+
+    ["勤勉は幸運の母である。", "ベンジャミン・フランクリン", "中吉", "広く帰属される言葉"],
+
+    ["準備を怠ることは、失敗への準備をすることである。", "ベンジャミン・フランクリン", "大吉", "広く帰属される言葉"],
+
+    ["私たちが恐れるべき唯一のものは、恐怖そのものである。", "フランクリン・D・ルーズベルト", "大吉", "就任演説"],
+
+    ["未来は、自分の夢の美しさを信じる人のものである。", "エレノア・ルーズベルト", "大吉", "広く知られる言葉"],
+
+    ["自分にはできないと思うことを、やってみなさい。", "エレノア・ルーズベルト", "大大吉", "広く知られる言葉"],
+
+    ["何事も、成し遂げるまでは不可能に見える。", "ネルソン・マンデラ", "大吉", "広く知られる言葉"],
+
+    ["教育は、世界を変えるために使える最も強力な武器である。", "ネルソン・マンデラ", "大大吉", "2003年の講演"],
+
+    ["勝者とは、決してあきらめない夢見る人である。", "ネルソン・マンデラ", "大吉", "広く帰属される言葉"],
+
+    ["私は失敗していない。うまくいかない方法を見つけただけだ。", "トーマス・エジソン", "大吉", "広く知られる言葉"],
+
+    ["多くの人がチャンスを逃すのは、それが仕事の姿をしているからだ。", "トーマス・エジソン", "大大吉", "広く知られる言葉"],
+
+    ["天才とは、1パーセントのひらめきと99パーセントの努力である。", "トーマス・エジソン", "大吉", "広く知られる言葉"],
+
+    ["始める方法は、話すことをやめて行動することだ。", "ウォルト・ディズニー", "大吉", "広く知られる言葉"],
+
+    ["夢見ることができるなら、それを実現することもできる。", "ウォルト・ディズニー", "大大吉", "広く帰属される言葉"],
+
+    ["勇気を持って追いかければ、夢は実現できる。", "ウォルト・ディズニー", "大吉", "広く帰属される言葉"],
+
+    ["笑いに時代はなく、想像力に年齢はなく、夢は永遠である。", "ウォルト・ディズニー", "中吉", "広く知られる言葉"],
+
+    ["成功への秘訣は、まず始めることだ。", "マーク・トウェイン", "大吉", "広く帰属される言葉"],
+
+    ["なりたかった自分になるのに、遅すぎることはない。", "ジョージ・エリオット", "大大吉", "広く帰属される言葉"],
+
+    ["情熱なしに偉大なことは何も成し遂げられなかった。", "ラルフ・ワルド・エマーソン", "大吉", "広く知られる言葉"],
+
+    ["道がないところへ行き、道を残しなさい。", "ラルフ・ワルド・エマーソン", "大大吉", "広く帰属される言葉"],
+
+    ["決して、決して、決してあきらめるな。", "ウィンストン・チャーチル", "大大吉", "1941年の演説"],
+
+    ["成功は終わりではなく、失敗は終わりでもない。", "ウィンストン・チャーチル", "大吉", "広く帰属される言葉"],
+
+    ["地獄を通っているなら、そのまま進み続けなさい。", "ウィンストン・チャーチル", "大吉", "広く帰属される言葉"],
+
+    ["大切なのは、疑問を持ち続けることだ。", "アルベルト・アインシュタイン", "大吉", "広く知られる言葉"],
+
+    ["想像力は知識よりも重要である。", "アルベルト・アインシュタイン", "大大吉", "1929年のインタビュー"],
+
+    ["一度も失敗したことがない人は、新しいことを試していない人だ。", "アルベルト・アインシュタイン", "大吉", "広く帰属される言葉"],
+
+    ["人生は自転車に乗るようなものだ。バランスを保つには動き続けなければならない。", "アルベルト・アインシュタイン", "大吉", "1930年の手紙"],
+
+    ["人生において恐れるものは何もない。理解すべきものがあるだけだ。", "マリー・キュリー", "大大吉", "広く知られる言葉"],
+
+    ["未来を予測する最善の方法は、自分で未来をつくることだ。", "ピーター・ドラッカー", "大吉", "広く帰属される言葉"],
+
+    ["何かを信じなければならない。直感、運命、人生、カルマなどを。", "スティーブ・ジョブズ", "大吉", "2005年スタンフォード大学卒業式"],
+
+    ["あなたの時間は限られている。他人の人生を生きるために時間を使ってはいけない。", "スティーブ・ジョブズ", "大大吉", "2005年スタンフォード大学卒業式"],
+
+    ["ハングリーであれ。愚か者であれ。", "スティーブ・ジョブズ", "大吉", "2005年スタンフォード大学卒業式"],
+
+    ["未来は、今日何をするかによって決まる。", "マハトマ・ガンディー", "中吉", "広く帰属される言葉"],
+
+    ["あなたが世界で見たいと思う変化に、あなた自身がなりなさい。", "マハトマ・ガンディー", "大大吉", "広く帰属される言葉"],
+
+    ["力は身体能力から来るのではない。不屈の意志から来る。", "マハトマ・ガンディー", "大吉", "広く帰属される言葉"],
+
+    ["生き残るのは最も強い種ではなく、変化に適応できる種である。", "チャールズ・ダーウィン", "大吉", "広く帰属される言葉"],
+
+    ["学ぶことは、決して心を疲れさせない。", "レオナルド・ダ・ヴィンチ", "大吉", "広く知られる言葉"],
+
+    ["シンプルさは究極の洗練である。", "レオナルド・ダ・ヴィンチ", "大大吉", "広く帰属される言葉"],
+
+    ["天才とは、永遠の忍耐である。", "ミケランジェロ", "大吉", "広く帰属される言葉"],
+
+    ["多くの人にとって最大の危険は、目標が低すぎて達成してしまうことだ。", "ミケランジェロ", "大大吉", "広く帰属される言葉"],
+
+    ["もし私が遠くを見ることができたのなら、巨人の肩の上に立ったからだ。", "アイザック・ニュートン", "大吉", "1675年の手紙"],
+
+    ["人生の幸福は、思考の質に左右される。", "マルクス・アウレリウス", "大吉", "『自省録』"],
+
+    ["あなたの人生は、あなたの思考がつくるものだ。", "マルクス・アウレリウス", "大大吉", "『自省録』"],
+
+    ["困難が行動を妨げることはない。行動することで困難を乗り越える。", "マルクス・アウレリウス", "大吉", "『自省録』"],
+
+    ["経験とは、私たちが失敗につける名前にすぎない。", "オスカー・ワイルド", "大吉", "『ウィンダミア卿夫人の扇』"],
+
+    ["私たちは皆どん底にいる。しかし、星を見上げている者もいる。", "オスカー・ワイルド", "大大吉", "『ウィンダミア卿夫人の扇』"],
+
+    ["創造性は使えば使うほど増えていく。", "マヤ・アンジェロウ", "大大吉", "広く知られる言葉"],
+
+    ["あなたができると思うことから始めなさい。", "ヘンリー・フォード", "大吉", "広く帰属される言葉"],
+
+    ["できると思っても、できないと思っても、どちらも正しい。", "ヘンリー・フォード", "大大吉", "広く帰属される言葉"],
+
+    ["障害とは、目標から目をそらしたときに見えるものだ。", "ヘンリー・フォード", "大吉", "広く帰属される言葉"],
+
+    ["最も重要なのは、行動することだ。", "アメリア・イアハート", "大吉", "広く帰属される言葉"],
+
+    ["最も難しいことは、行動する決断である。", "アメリア・イアハート", "大大吉", "広く帰属される言葉"],
+
+    ["偉大なことを成し遂げるには、行動するだけではなく夢見ることも必要だ。", "アナトール・フランス", "大吉", "広く帰属される言葉"],
+
+    ["一歩ずつ進めば、遠くまで行くことができる。", "日本のことわざ", "大大吉", "ことわざ"],
+
+    ["継続は力なり。", "日本のことわざ", "大吉", "ことわざ"],
+
+    ["雨垂れ石を穿つ。", "日本のことわざ", "吉", "ことわざ"],
+
+    ["失敗は成功のもと。", "日本のことわざ", "大吉", "ことわざ"],
+
+    ["為せば成る、為さねば成らぬ何事も。", "上杉鷹山", "大大吉", "広く知られる言葉"],
+
+    ["初心忘るべからず。", "世阿弥", "大吉", "『花鏡』"],
+
+    ["七転び八起き。", "日本のことわざ", "大大吉", "ことわざ"],
+
+    ["石の上にも三年。", "日本のことわざ", "大吉", "ことわざ"],
+
+    ["努力して結果が出ると、自信になる。", "王貞治", "大吉", "広く知られる言葉"],
+
+    ["小さなことを積み重ねることが、遠くへ行く道になる。", "イチロー", "大吉", "広く知られる言葉"],
+
+    ["特別なことをするために、特別な人間である必要はない。", "イチロー", "大大吉", "広く知られる言葉"],
+
+    ["夢は見るものではなく、かなえるもの。", "大谷翔平", "大吉", "広く知られる言葉"],
+
+    ["自分の可能性を信じることが、最初の一歩だ。", "羽生善治", "大吉", "広く知られる言葉"],
+
+    ["努力を努力と思わないくらい続けることが大切だ。", "羽生善治", "大吉", "広く知られる言葉"],
+
+    ["才能とは、努力を続けられることだ。", "羽生善治", "大大吉", "広く知られる言葉"],
+
+    ["夢なき者に成功なし。", "吉田松陰", "大吉", "広く知られる言葉"],
+
+    ["できることから、まず始めなさい。", "ヨハン・ヴォルフガング・フォン・ゲーテ", "大吉", "広く帰属される言葉"],
+
+    ["今日という日は、二度と戻ってこない。", "ウィリアム・シェイクスピア", "吉", "広く帰属される言葉"],
+
+    ["行動は雄弁である。", "ウィリアム・シェイクスピア", "大吉", "広く帰属される言葉"],
+
+    ["希望は、目覚めている人の夢である。", "アリストテレス", "大吉", "広く帰属される言葉"],
+
+    ["私たちは繰り返し行うことの結果である。", "アリストテレス", "大大吉", "広く帰属される言葉"],
+
+    ["卓越とは一度の行為ではなく、習慣である。", "アリストテレス", "大吉", "広く帰属される言葉"],
+
+    ["学ぶことは人生そのものの一部である。", "プラトン", "大吉", "広く帰属される言葉"],
+
+    ["自分自身を知ることが、知恵の始まりである。", "ソクラテス", "大大吉", "広く帰属される言葉"],
+
+    ["知恵とは、自分が何も知らないと知ることである。", "ソクラテス", "大吉", "広く帰属される言葉"],
+
+    ["疑問を持つことから、学びは始まる。", "ソクラテス", "大吉", "広く帰属される言葉"],
+
+    ["未来は、今この瞬間から変えられる。", "マハトマ・ガンディー", "吉", "広く帰属される言葉"],
+
+    ["努力は必ずしも成功を保証しない。しかし成長を保証する。", "マイケル・ジョーダン", "大吉", "広く知られる言葉"],
+
+    ["私は何度も失敗した。それが成功した理由だ。", "マイケル・ジョーダン", "大大吉", "広く帰属される言葉"],
+
+    ["限界を決めるのは、自分自身だ。", "マイケル・ジョーダン", "大吉", "広く帰属される言葉"],
+
+    ["成功とは、情熱を失わずに失敗から失敗へ進むことである。", "ウィンストン・チャーチル", "大吉", "広く帰属される言葉"],
+
+    ["努力を続ける者に、道は開ける。", "日本のことわざ", "吉", "ことわざ"],
+
+    ["学ぶことをやめたとき、成長も止まる。", "レオナルド・ダ・ヴィンチ", "大吉", "広く帰属される言葉"],
+
+    ["夢を持つことは、未来をつくることだ。", "エレノア・ルーズベルト", "大吉", "広く帰属される言葉"],
+
+    ["今日の小さな一歩が、明日の大きな力になる。", "日本のことわざ", "大大吉", "広く伝わる言葉"],
+
+    /* シークレット */
+
+    ["秘密の扉は、挑戦した者にだけ開かれる。", "学びの御神籤", "シークレット", "特別収録"],
+
+    ["努力の先にある景色は、努力した人にしか見えない。", "学びの御神籤", "シークレット", "特別収録"],
+
+    ["今日の一歩を重ねた者だけが、まだ見ぬ明日へ進める。", "学びの御神籤", "シークレット", "特別収録"],
+
+    ["最後まであきらめなかった人だけが、自分の可能性を知る。", "学びの御神籤", "シークレット", "特別収録"]
+
+];
 
 
-        setTimeout(
-            function () {
+/* =========================================================
+   名言をオブジェクト化
+========================================================= */
 
-                const randomIndex =
-                    Math.floor(
-                        Math.random()
-                        *
-                        quotes.length
-                    );
+quotes.forEach((q, i) => {
 
-                const item =
-                    quotes[randomIndex];
+    q.id = i + 1;
 
+    q.quote = q[0];
 
-                showResult(item);
+    q.author = q[1];
 
-                register(item.id);
+    q.fortune = q[2];
 
+    q.source = q[3];
 
-                lastDraw =
-                    Date.now();
+});
 
 
-                localStorage.setItem(
-                    "quoteLastDraw",
-                    lastDraw
-                );
+/* =========================================================
+   DOM
+========================================================= */
+
+let drawButton;
+
+let fortuneElement;
+let quoteElement;
+let authorElement;
+
+let cooldownElement;
+let cooldownMessageElement;
+
+let bookGrid;
+
+let achievementRate;
+let achievementCount;
+let progressBar;
+
+let modal;
+let closeModal;
+
+let modalFortune;
+let modalQuote;
+let modalAuthor;
+let modalSource;
+
+let settingsButton;
+let settingsModal;
+let closeSettings;
+
+let addMessage;
+let saveSettings;
+let messageInputs;
 
 
-                updateBook();
+/* =========================================================
+   状態
+========================================================= */
 
-                updateCooldown();
+let collected = [];
 
-            },
-            600
-        );
-    }
+let lastDraw = 0;
+
+let currentCooldownDuration = COOLDOWN_TIME;
+
+let supportMessages = [];
+
+let currentSupportMessage = "";
+
+let todayChallenge = "";
+
+
+/* =========================================================
+   初期化
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initialize
 );
 
 
-/* =====================================================
+function initialize() {
+
+    drawButton =
+        document.getElementById("drawButton");
+
+    fortuneElement =
+        document.getElementById("fortune");
+
+    quoteElement =
+        document.getElementById("quote");
+
+    authorElement =
+        document.getElementById("author");
+
+    cooldownElement =
+        document.getElementById("cooldown");
+
+    cooldownMessageElement =
+        document.getElementById("cooldownMessage");
+
+    bookGrid =
+        document.getElementById("bookGrid");
+
+    achievementRate =
+        document.getElementById("achievementRate");
+
+    achievementCount =
+        document.getElementById("achievementCount");
+
+    progressBar =
+        document.getElementById("progressBar");
+
+
+    modal =
+        document.getElementById("modal");
+
+    closeModal =
+        document.getElementById("closeModal");
+
+    modalFortune =
+        document.getElementById("modalFortune");
+
+    modalQuote =
+        document.getElementById("modalQuote");
+
+    modalAuthor =
+        document.getElementById("modalAuthor");
+
+    modalSource =
+        document.getElementById("modalSource");
+
+
+    settingsButton =
+        document.getElementById("settingsButton");
+
+    settingsModal =
+        document.getElementById("settingsModal");
+
+    closeSettings =
+        document.getElementById("closeSettings");
+
+    addMessage =
+        document.getElementById("addMessage");
+
+    saveSettings =
+        document.getElementById("saveSettings");
+
+    messageInputs =
+        document.getElementById("messageInputs");
+
+
+    collected =
+        loadCollection();
+
+
+    lastDraw =
+        Number(
+            localStorage.getItem(
+                STORAGE_LAST_DRAW
+            )
+        ) || 0;
+
+
+    currentCooldownDuration =
+        Number(
+            localStorage.getItem(
+                STORAGE_COOLDOWN_DURATION
+            )
+        ) || COOLDOWN_TIME;
+
+
+    if (
+        currentCooldownDuration !==
+            COOLDOWN_TIME &&
+        currentCooldownDuration !==
+            DUPLICATE_COOLDOWN_TIME
+    ) {
+
+        currentCooldownDuration =
+            COOLDOWN_TIME;
+
+    }
+
+
+    supportMessages =
+        loadMessages();
+
+
+    todayChallenge =
+        localStorage.getItem(
+            STORAGE_CHALLENGE
+        ) || "";
+
+
+    currentSupportMessage =
+        localStorage.getItem(
+            STORAGE_SUPPORT
+        ) || "";
+
+
+    setupEvents();
+
+
+    updateBook();
+
+    updateAchievement();
+
+    updateCooldown();
+
+
+    setInterval(
+        updateCooldown,
+        1000
+    );
+
+}
+
+
+/* =========================================================
+   イベント
+========================================================= */
+
+function setupEvents() {
+
+    if (drawButton) {
+
+        drawButton.addEventListener(
+            "click",
+            drawOmikuji
+        );
+
+    }
+
+
+    if (closeModal) {
+
+        closeModal.addEventListener(
+            "click",
+            closeQuoteModal
+        );
+
+    }
+
+
+    if (modal) {
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    closeQuoteModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (settingsButton) {
+
+        settingsButton.addEventListener(
+            "click",
+            openSettings
+        );
+
+    }
+
+
+    if (closeSettings) {
+
+        closeSettings.addEventListener(
+            "click",
+            closeSettingsModal
+        );
+
+    }
+
+
+    if (settingsModal) {
+
+        settingsModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    settingsModal
+                ) {
+
+                    closeSettingsModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (addMessage) {
+
+        addMessage.addEventListener(
+            "click",
+            () => {
+
+                createMessageInput("");
+
+            }
+        );
+
+    }
+
+
+    if (saveSettings) {
+
+        saveSettings.addEventListener(
+            "click",
+            saveSupportMessages
+        );
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Escape") {
+
+                closeQuoteModal();
+
+                closeSettingsModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   御神籤を引く
+========================================================= */
+
+function drawOmikuji() {
+
+    if (isCooldown()) {
+
+        updateCooldown();
+
+        return;
+
+    }
+
+
+    if (
+        !drawButton ||
+        quotes.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    drawButton.disabled = true;
+
+    drawButton.textContent =
+        "🎋 引いています…";
+
+
+    setTimeout(() => {
+
+        const item =
+            getRandomQuote();
+
+
+        /*
+         * 重要
+         *
+         * 登録前に確認する。
+         *
+         * これによって、
+         * 「すでに持っている名言」
+         * なのかを正しく判断できる。
+         */
+
+        const isDuplicate =
+            collected.includes(item.id);
+
+
+        /*
+         * 結果表示
+         */
+
+        showResult(item);
+
+
+        /*
+         * 図鑑登録
+         *
+         * 重複なら何も追加されない。
+         */
+
+        registerQuote(item.id);
+
+
+        /*
+         * クールタイムを決定
+         *
+         * 初回 → 30分
+         * 重複 → 25分
+         */
+
+        if (isDuplicate) {
+
+            currentCooldownDuration =
+                DUPLICATE_COOLDOWN_TIME;
+
+        } else {
+
+            currentCooldownDuration =
+                COOLDOWN_TIME;
+
+        }
+
+
+        /*
+         * クールタイム開始時刻
+         */
+
+        lastDraw =
+            Date.now();
+
+
+        /*
+         * 保存
+         */
+
+        localStorage.setItem(
+            STORAGE_LAST_DRAW,
+            String(lastDraw)
+        );
+
+
+        localStorage.setItem(
+            STORAGE_COOLDOWN_DURATION,
+            String(
+                currentCooldownDuration
+            )
+        );
+
+
+        /*
+         * クールタイム中に表示する
+         * 課題を決定
+         */
+
+        createTodayChallenge();
+
+
+        /*
+         * 学びの神託を1回だけ決定
+         */
+
+        chooseSupportMessage();
+
+
+        /*
+         * 画面更新
+         */
+
+        updateBook();
+
+        updateAchievement();
+
+        updateCooldown();
+
+
+        /*
+         * 重複だった場合
+         * ボーナス表示
+         */
+
+        if (isDuplicate) {
+
+            showDuplicateNotification();
+
+        }
+
+
+        /*
+         * レアリティ演出
+         */
+
+        playRarityEffect(item);
+
+
+    }, 500);
+
+}
+
+
+/* =========================================================
+   レアリティ抽選
+========================================================= */
+
+function getRandomQuote() {
+
+    const secretQuotes =
+        quotes.filter(
+            q =>
+                q.fortune ===
+                "シークレット"
+        );
+
+
+    const normalQuotes =
+        quotes.filter(
+            q =>
+                q.fortune !==
+                "シークレット"
+        );
+
+
+    /*
+     * シークレット：約2%
+     */
+
+    if (
+        secretQuotes.length > 0 &&
+        Math.random() < 0.02
+    ) {
+
+        return secretQuotes[
+            Math.floor(
+                Math.random() *
+                secretQuotes.length
+            )
+        ];
+
+    }
+
+
+    return normalQuotes[
+        Math.floor(
+            Math.random() *
+            normalQuotes.length
+        )
+    ];
+
+}
+
+
+/* =========================================================
    結果表示
-===================================================== */
+========================================================= */
 
 function showResult(item) {
 
-    fortuneElement.textContent =
-        item.fortune;
+    if (fortuneElement) {
 
-    quoteElement.textContent =
-        "「" +
-        item.quote +
-        "」";
+        fortuneElement.textContent =
+            item.fortune;
 
-    authorElement.textContent =
-        "― " +
-        item.author;
+
+        fortuneElement.className =
+            "";
+
+
+        fortuneElement.classList.add(
+            "rarity-" +
+            item.fortune
+        );
+
+    }
+
+
+    if (quoteElement) {
+
+        quoteElement.textContent =
+            `「${item.quote}」`;
+
+    }
+
+
+    if (authorElement) {
+
+        authorElement.textContent =
+            `― ${item.author}`;
+
+    }
+
 }
 
 
-/* =====================================================
+/* =========================================================
    図鑑登録
-===================================================== */
+========================================================= */
 
-function register(id) {
+function registerQuote(id) {
+
+    /*
+     * すでに登録済みなら終了
+     *
+     * これにより重複時に
+     * 達成率が増えない。
+     */
 
     if (
-        !collected.includes(id)
+        collected.includes(id)
     ) {
 
-        collected.push(id);
+        return;
 
-        localStorage.setItem(
-            "quoteCollection",
-            JSON.stringify(
-                collected
-            )
-        );
     }
+
+
+    collected.push(id);
+
+
+    collected.sort(
+        (a, b) => a - b
+    );
+
+
+    localStorage.setItem(
+        STORAGE_COLLECTION,
+        JSON.stringify(collected)
+    );
+
 }
 
 
-/* =====================================================
-   図鑑を作る
-===================================================== */
+/* =========================================================
+   図鑑表示
+========================================================= */
 
 function updateBook() {
 
+    if (!bookGrid) {
+
+        return;
+
+    }
+
+
     bookGrid.innerHTML = "";
 
-    countElement.textContent =
-        collected.length;
 
+    quotes.forEach(item => {
 
-    quotes.forEach(
-        function(item) {
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "book-card";
-
-
-            /* 登録済み */
-
-            if (
-                collected.includes(
-                    item.id
-                )
-            ) {
-
-                card.classList.add(
-                    "unlocked"
-                );
-
-
-                card.innerHTML = `
-
-                    <div class="book-number">
-                        No.${String(item.id).padStart(3, "0")}
-                    </div>
-
-                    <div class="book-fortune">
-                        ${item.fortune}
-                    </div>
-
-                    <div class="book-author">
-                        ${item.author}
-                    </div>
-
-                `;
-
-
-                /*
-                    カードを押す
-                    ↓
-                    名言詳細を表示
-                */
-
-                card.addEventListener(
-                    "click",
-                    function() {
-
-                        openModal(item);
-
-                    }
-                );
-
-            }
-
-
-            /* 未登録 */
-
-            else {
-
-                card.classList.add(
-                    "locked"
-                );
-
-
-                card.innerHTML = `
-
-                    <div class="book-number">
-                        No.${String(item.id).padStart(3, "0")}
-                    </div>
-
-                    <div class="lock">
-                        🔒
-                    </div>
-
-                `;
-            }
-
-
-            bookGrid.appendChild(
-                card
+        const card =
+            document.createElement(
+                "div"
             );
+
+
+        card.className =
+            "book-card";
+
+
+        const unlocked =
+            collected.includes(
+                item.id
+            );
+
+
+        if (unlocked) {
+
+            card.classList.add(
+                "unlocked"
+            );
+
+
+            card.innerHTML = `
+
+                <div class="book-number">
+                    No.${String(item.id).padStart(3, "0")}
+                </div>
+
+                <div class="book-fortune">
+                    ${escapeHTML(item.fortune)}
+                </div>
+
+                <div class="book-author">
+                    ${escapeHTML(item.author)}
+                </div>
+
+            `;
+
+
+            /*
+             * 登録済みの御神籤をクリックすると
+             * 名言の詳細を表示
+             */
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    openQuoteModal(item);
+
+                }
+            );
+
+        } else {
+
+            card.classList.add(
+                "locked"
+            );
+
+
+            card.innerHTML = `
+
+                <div class="book-number">
+                    No.${String(item.id).padStart(3, "0")}
+                </div>
+
+                <div class="lock">
+                    🔒
+                </div>
+
+            `;
+
         }
-    );
+
+
+        bookGrid.appendChild(card);
+
+    });
+
 }
 
 
-/* =====================================================
-   名言詳細
-===================================================== */
+/* =========================================================
+   達成率
+========================================================= */
 
-function openModal(item) {
+function updateAchievement() {
 
-    modalFortune.textContent =
-        item.fortune;
+    const current =
+        collected.length;
 
-    modalQuote.textContent =
-        "「" +
-        item.quote +
-        "」";
 
-    modalAuthor.textContent =
-        "― " +
-        item.author;
+    const total =
+        quotes.length;
 
-    modalSource.textContent =
-        "出典：" +
-        item.source;
+
+    if (total <= 0) {
+
+        return;
+
+    }
+
+
+    const percentage =
+        Math.floor(
+            (current / total) *
+            100
+        );
+
+
+    if (achievementRate) {
+
+        achievementRate.textContent =
+            `${percentage}%`;
+
+    }
+
+
+    if (achievementCount) {
+
+        achievementCount.textContent =
+            `${current} / ${total}`;
+
+    }
+
+
+    if (progressBar) {
+
+        progressBar.style.width =
+            `${percentage}%`;
+
+    }
+
+}
+
+
+/* =========================================================
+   名言モーダル
+========================================================= */
+
+function openQuoteModal(item) {
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    if (modalFortune) {
+
+        modalFortune.textContent =
+            item.fortune;
+
+    }
+
+
+    if (modalQuote) {
+
+        modalQuote.textContent =
+            `「${item.quote}」`;
+
+    }
+
+
+    if (modalAuthor) {
+
+        modalAuthor.textContent =
+            `― ${item.author}`;
+
+    }
+
+
+    if (modalSource) {
+
+        modalSource.textContent =
+            `出典：${item.source}`;
+
+    }
 
 
     modal.classList.add(
         "open"
     );
+
 }
 
 
-/* =====================================================
-   モーダルを閉じる
-===================================================== */
+function closeQuoteModal() {
 
-closeModal.addEventListener(
-    "click",
-    function() {
+    if (modal) {
 
         modal.classList.remove(
             "open"
         );
 
     }
-);
+
+}
 
 
-document
-    .querySelector(".modal-bg")
-    .addEventListener(
-        "click",
-        function() {
+/* =========================================================
+   クールタイム
+========================================================= */
 
-            modal.classList.remove(
-                "open"
+function isCooldown() {
+
+    if (!lastDraw) {
+
+        return false;
+
+    }
+
+
+    return (
+        Date.now() -
+        lastDraw <
+        currentCooldownDuration
+    );
+
+}
+
+
+/* =========================================================
+   残り時間
+========================================================= */
+
+function getRemainingTime() {
+
+    if (!lastDraw) {
+
+        return 0;
+
+    }
+
+
+    return Math.max(
+
+        0,
+
+        currentCooldownDuration -
+        (
+            Date.now() -
+            lastDraw
+        )
+
+    );
+
+}
+
+
+/* =========================================================
+   クールタイム表示
+========================================================= */
+
+function updateCooldown() {
+
+    const remaining =
+        getRemainingTime();
+
+
+    /*
+     * クールタイム終了
+     */
+
+    if (remaining <= 0) {
+
+        if (drawButton) {
+
+            drawButton.disabled =
+                false;
+
+
+            drawButton.textContent =
+                "🎋 御神籤を引く";
+
+        }
+
+
+        if (cooldownElement) {
+
+            cooldownElement.textContent =
+                "✨ 御神籤を引くことができます";
+
+        }
+
+
+        finishCooldown();
+
+        return;
+
+    }
+
+
+    /*
+     * クールタイム中
+     */
+
+    if (drawButton) {
+
+        drawButton.disabled =
+            true;
+
+
+        drawButton.textContent =
+            "⏳ 次の御神籤まで待機";
+
+    }
+
+
+    const totalSeconds =
+        Math.ceil(
+            remaining / 1000
+        );
+
+
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
+
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    if (cooldownElement) {
+
+        cooldownElement.textContent =
+            `次の御神籤まで ${minutes}分 ${String(seconds).padStart(2, "0")}秒`;
+
+    }
+
+
+    /*
+     * 課題はクールタイム中に
+     * まだ決まっていなければ決定。
+     */
+
+    if (!todayChallenge) {
+
+        createTodayChallenge();
+
+    }
+
+
+    /*
+     * 応援メッセージは
+     * クールタイム中に変更しない。
+     */
+
+    if (!currentSupportMessage) {
+
+        chooseSupportMessage();
+
+    }
+
+
+    showCooldownContent();
+
+}
+
+
+/* =========================================================
+   クールタイム終了
+========================================================= */
+
+function finishCooldown() {
+
+    todayChallenge = "";
+
+    currentSupportMessage = "";
+
+
+    localStorage.removeItem(
+        STORAGE_CHALLENGE
+    );
+
+
+    localStorage.removeItem(
+        STORAGE_SUPPORT
+    );
+
+
+    localStorage.removeItem(
+        STORAGE_COOLDOWN_DURATION
+    );
+
+
+    currentCooldownDuration =
+        COOLDOWN_TIME;
+
+
+    if (cooldownMessageElement) {
+
+        cooldownMessageElement.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   本日の課題
+========================================================= */
+
+function createTodayChallenge() {
+
+    /*
+     * すでに決まっていたら変更しない。
+     */
+
+    if (todayChallenge) {
+
+        return;
+
+    }
+
+
+    const index =
+        Math.floor(
+            Math.random() *
+            challengeTasks.length
+        );
+
+
+    todayChallenge =
+        challengeTasks[index];
+
+
+    localStorage.setItem(
+        STORAGE_CHALLENGE,
+        todayChallenge
+    );
+
+}
+
+
+/* =========================================================
+   学びの神託
+========================================================= */
+
+function chooseSupportMessage() {
+
+    const messages =
+        supportMessages.length > 0
+            ? supportMessages
+            : defaultSupportMessages;
+
+
+    const index =
+        Math.floor(
+            Math.random() *
+            messages.length
+        );
+
+
+    currentSupportMessage =
+        messages[index];
+
+
+    /*
+     * 一度決めたら、
+     * クールタイムが終わるまで
+     * 変更しない。
+     */
+
+    localStorage.setItem(
+        STORAGE_SUPPORT,
+        currentSupportMessage
+    );
+
+}
+
+
+/* =========================================================
+   クールタイム中のコンテンツ
+========================================================= */
+
+function showCooldownContent() {
+
+    if (!cooldownMessageElement) {
+
+        return;
+
+    }
+
+
+    if (!currentSupportMessage) {
+
+        chooseSupportMessage();
+
+    }
+
+
+    if (!todayChallenge) {
+
+        createTodayChallenge();
+
+    }
+
+
+    cooldownMessageElement.innerHTML = `
+
+        <div class="support-title">
+            🌸 学びの神託
+        </div>
+
+        <div class="support-text">
+            「${escapeHTML(currentSupportMessage)}」
+        </div>
+
+        <div class="today-challenge">
+
+            <div class="challenge-title">
+                📚 本日挑戦する課題
+            </div>
+
+            <div class="challenge-text">
+                ${escapeHTML(todayChallenge)}
+            </div>
+
+        </div>
+
+    `;
+
+
+    cooldownMessageElement.style.display =
+        "block";
+
+}
+
+
+/* =========================================================
+   重複ボーナス
+========================================================= */
+
+function showDuplicateNotification() {
+
+    let notification =
+        document.querySelector(
+            ".duplicate-notification"
+        );
+
+
+    /*
+     * なければ自動生成
+     */
+
+    if (!notification) {
+
+        notification =
+            document.createElement(
+                "div"
+            );
+
+
+        notification.className =
+            "duplicate-notification";
+
+
+        document.body.appendChild(
+            notification
+        );
+
+    }
+
+
+    notification.innerHTML = `
+
+        <div class="duplicate-title">
+            ✦ 重複ボーナス
+        </div>
+
+        <div class="duplicate-text">
+            すでに図鑑に登録されている御神籤です
+        </div>
+
+        <div class="duplicate-bonus">
+            次のクールタイム −5分
+        </div>
+
+    `;
+
+
+    notification.classList.add(
+        "show"
+    );
+
+
+    /*
+     * 3秒後に消す
+     */
+
+    setTimeout(
+        () => {
+
+            notification.classList.remove(
+                "show"
+            );
+
+        },
+        3000
+    );
+
+}
+
+
+/* =========================================================
+   レアリティ演出
+========================================================= */
+
+function playRarityEffect(item) {
+
+    /*
+     * シークレットの場合
+     */
+
+    if (
+        item.fortune ===
+        "シークレット"
+    ) {
+
+        document.body.classList.add(
+            "secret-effect"
+        );
+
+
+        setTimeout(
+            () => {
+
+                document.body.classList.remove(
+                    "secret-effect"
+                );
+
+            },
+            2500
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * 大大吉
+     */
+
+    if (
+        item.fortune ===
+        "大大吉"
+    ) {
+
+        document.body.classList.add(
+            "great-effect"
+        );
+
+
+        setTimeout(
+            () => {
+
+                document.body.classList.remove(
+                    "great-effect"
+                );
+
+            },
+            1800
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   設定
+========================================================= */
+
+function openSettings() {
+
+    renderMessageInputs();
+
+
+    if (settingsModal) {
+
+        settingsModal.classList.add(
+            "open"
+        );
+
+    }
+
+}
+
+
+function closeSettingsModal() {
+
+    if (settingsModal) {
+
+        settingsModal.classList.remove(
+            "open"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   設定メッセージ表示
+========================================================= */
+
+function renderMessageInputs() {
+
+    if (!messageInputs) {
+
+        return;
+
+    }
+
+
+    messageInputs.innerHTML = "";
+
+
+    /*
+     * まだ設定がない場合
+     */
+
+    if (
+        supportMessages.length === 0
+    ) {
+
+        createMessageInput("");
+
+        return;
+
+    }
+
+
+    supportMessages.forEach(
+        message => {
+
+            createMessageInput(
+                message
             );
 
         }
     );
 
-
-/* =====================================================
-   クールタイム表示
-===================================================== */
-
-function updateCooldown() {
-
-    const remaining =
-        COOLDOWN -
-        (
-            Date.now()
-            -
-            lastDraw
-        );
-
-
-    /* 引ける */
-
-    if (
-        remaining <= 0
-    ) {
-
-        drawButton.disabled =
-            false;
-
-        drawButton.textContent =
-            "🎋　御神籤を引く";
-
-        cooldownElement.textContent =
-            "✨ 御神籤を引くことができます";
-
-        return;
-    }
-
-
-    /* 残り時間 */
-
-    const minutes =
-        Math.floor(
-            remaining / 60000
-        );
-
-    const seconds =
-        Math.floor(
-            (
-                remaining %
-                60000
-            ) / 1000
-        );
-
-
-    drawButton.disabled =
-        true;
-
-    drawButton.textContent =
-        "⏳　次の御神籤まで待機";
-
-
-    cooldownElement.textContent =
-        "次の御神籤まで " +
-        minutes +
-        "分 " +
-        String(seconds).padStart(
-            2,
-            "0"
-        ) +
-        "秒";
 }
 
 
-/* =====================================================
-   初期化
-===================================================== */
+/* =========================================================
+   メッセージ入力欄作成
+========================================================= */
 
-updateBook();
+function createMessageInput(value) {
 
-updateCooldown();
+    if (!messageInputs) {
+
+        return;
+
+    }
 
 
-/* 1秒ごとにタイマー更新 */
+    const row =
+        document.createElement(
+            "div"
+        );
 
-setInterval(
-    updateCooldown,
-    1000
-);
+
+    row.className =
+        "message-row";
+
+
+    const input =
+        document.createElement(
+            "input"
+        );
+
+
+    input.type =
+        "text";
+
+
+    input.placeholder =
+        "勉強を応援するメッセージ";
+
+
+    input.value =
+        value || "";
+
+
+    const deleteButton =
+        document.createElement(
+            "button"
+        );
+
+
+    deleteButton.type =
+        "button";
+
+
+    deleteButton.className =
+        "delete-message";
+
+
+    deleteButton.textContent =
+        "×";
+
+
+    deleteButton.addEventListener(
+        "click",
+        () => {
+
+            row.remove();
+
+        }
+    );
+
+
+    row.appendChild(
+        input
+    );
+
+
+    row.appendChild(
+        deleteButton
+    );
+
+
+    messageInputs.appendChild(
+        row
+    );
+
+}
+
+
+/* =========================================================
+   設定保存
+========================================================= */
+
+function saveSupportMessages() {
+
+    if (!messageInputs) {
+
+        return;
+
+    }
+
+
+    const inputs =
+        messageInputs.querySelectorAll(
+            "input"
+        );
+
+
+    supportMessages =
+        Array.from(inputs)
+
+            .map(
+                input =>
+                    input.value.trim()
+            )
+
+            .filter(
+                message =>
+                    message.length > 0
+            );
+
+
+    localStorage.setItem(
+        STORAGE_MESSAGES,
+        JSON.stringify(
+            supportMessages
+        )
+    );
+
+
+    /*
+     * 現在のクールタイム中の
+     * 学びの神託は変更しない。
+     *
+     * 次回の御神籤から反映される。
+     */
+
+
+    closeSettingsModal();
+
+}
+
+
+/* =========================================================
+   図鑑データ読み込み
+========================================================= */
+
+function loadCollection() {
+
+    try {
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_COLLECTION
+                )
+            );
+
+
+        if (
+            Array.isArray(data)
+        ) {
+
+            return data
+
+                .map(Number)
+
+                .filter(
+                    id =>
+                        Number.isInteger(id) &&
+                        id >= 1 &&
+                        id <= quotes.length
+                );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "図鑑データの読み込みに失敗しました。",
+            error
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   応援メッセージ読み込み
+========================================================= */
+
+function loadMessages() {
+
+    try {
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_MESSAGES
+                )
+            );
+
+
+        if (
+            Array.isArray(data)
+        ) {
+
+            return data
+
+                .filter(
+                    message =>
+                        typeof message ===
+                        "string"
+                )
+
+                .map(
+                    message =>
+                        message.trim()
+                )
+
+                .filter(
+                    message =>
+                        message.length > 0
+                );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "設定データの読み込みに失敗しました。",
+            error
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   HTMLエスケープ
+========================================================= */
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(text);
+
+
+    return div.innerHTML;
+
+}

@@ -1,157 +1,446 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>⛩ 名言御神籤</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="style.css">
+    <title>御神籤 - 学びの言葉</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 </head>
+
 
 <body>
 
-<div class="background-torii left">⛩</div>
-<div class="background-torii right">⛩</div>
+    <!-- =========================================
+         背景
+    ========================================== -->
 
-<main class="app">
-
-    <!-- =========================
-         ヘッダー
-    ========================== -->
-
-    <header class="header">
-
-        <div class="crest">✦　✦　✦</div>
+    <div class="background">
 
         <div class="torii">⛩</div>
 
-        <h1>名言御神籤</h1>
+        <div class="background-pattern"></div>
 
-        <p>
-            偉人から、今日のあなたへ
-        </p>
-
-    </header>
+    </div>
 
 
-    <!-- =========================
-         おみくじ
-    ========================== -->
+    <!-- =========================================
+         設定ボタン
+    ========================================== -->
 
-    <section class="omikuji">
+    <button
+        id="settingsButton"
+        class="settings-button"
+        type="button"
+    >
+        ⚙️ 設定
+    </button>
 
-        <div class="paper">
 
-            <div class="paper-label">
-                今日の御神籤
+    <!-- =========================================
+         メイン
+    ========================================== -->
+
+    <main class="container">
+
+
+        <!-- タイトル -->
+
+        <header class="header">
+
+            <div class="title-decoration">
+                ─── ⛩ ───
             </div>
 
-            <div id="fortune">
-                ？
+            <h1>
+                学びの御神籤
+            </h1>
+
+            <p class="subtitle">
+                今日のあなたへの一言
+            </p>
+
+        </header>
+
+
+
+        <!-- =====================================
+             御神籤
+        ====================================== -->
+
+        <section class="omikuji">
+
+
+            <!-- 御神籤の紙 -->
+
+            <div class="omikuji-paper">
+
+
+                <!-- 上部 -->
+
+                <div class="paper-top">
+
+                    <span>御</span>
+                    <span>神</span>
+                    <span>籤</span>
+
+                </div>
+
+
+
+                <!-- 結果 -->
+
+                <div
+                    id="result"
+                    class="result"
+                >
+
+
+                    <!-- 運勢 -->
+
+                    <div
+                        id="fortune"
+                        class="fortune"
+                    >
+                        ？？？
+                    </div>
+
+
+                    <!-- 名言 -->
+
+                    <div
+                        id="quote"
+                        class="quote"
+                    >
+                        御神籤を引いて<br>
+                        今日の言葉を受け取ろう
+                    </div>
+
+
+                    <!-- 作者 -->
+
+                    <div
+                        id="author"
+                        class="author"
+                    >
+                    </div>
+
+
+                </div>
+
+
+                <!-- 下部 -->
+
+                <div class="paper-bottom">
+
+                    <span>学</span>
+                    <span>業</span>
+                    <span>成</span>
+                    <span>就</span>
+
+                </div>
+
             </div>
 
-            <div class="gold-line"></div>
 
-            <div id="quote">
-                御神籤を引いてください
+            <!-- =================================
+                 御神籤ボタン
+            ================================== -->
+
+            <button
+                id="drawButton"
+                class="draw-button"
+                type="button"
+            >
+                🎋 御神籤を引く
+            </button>
+
+
+            <!-- クールタイム -->
+
+            <div
+                id="cooldown"
+                class="cooldown"
+            >
+                御神籤を引くことができます
             </div>
 
-            <div id="author"></div>
 
-        </div>
+            <!-- クールタイム中の応援 -->
 
-
-        <button id="drawButton">
-            🎋　御神籤を引く
-        </button>
-
-        <div id="cooldown"></div>
-
-    </section>
-
-
-    <!-- =========================
-         図鑑
-    ========================== -->
-
-    <section class="collection">
-
-        <div class="collection-header">
-
-            <div>
-                <small>COLLECTION</small>
-
-                <h2>
-                    名言図鑑
-                </h2>
+            <div
+                id="cooldownMessage"
+                class="cooldown-message"
+            >
             </div>
 
-            <div class="progress">
-                <span id="count">0</span>
-                <small>/ 100</small>
+
+        </section>
+
+
+
+        <!-- =====================================
+             図鑑達成率
+        ====================================== -->
+
+        <section class="achievement-section">
+
+            <div class="section-title">
+                📖 御神籤図鑑
             </div>
 
-        </div>
+
+            <div class="achievement">
 
 
-        <div id="bookGrid"
-             class="book-grid">
-        </div>
-
-    </section>
+                <div class="achievement-label">
+                    コンプリート率
+                </div>
 
 
-    <!-- =========================
-         名言詳細
-    ========================== -->
+                <strong
+                    id="achievementRate"
+                >
+                    0%
+                </strong>
 
-    <div id="modal"
-         class="modal">
+
+                <span
+                    id="achievementCount"
+                >
+                    0 / 100
+                </span>
+
+
+                <!-- プログレスバー -->
+
+                <div class="progress">
+
+                    <div
+                        id="progressBar"
+                        class="progress-bar"
+                    ></div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================
+             図鑑
+        ====================================== -->
+
+        <section class="collection-section">
+
+
+            <div class="section-title">
+                御神籤図鑑
+            </div>
+
+
+            <p class="collection-description">
+                登録された御神籤を押すと
+                名言を見ることができます
+            </p>
+
+
+            <!-- 図鑑カード -->
+
+            <div
+                id="bookGrid"
+                class="book-grid"
+            >
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================================
+         名言詳細モーダル
+    ========================================== -->
+
+    <div
+        id="modal"
+        class="modal"
+    >
 
         <div class="modal-bg"></div>
 
-        <div class="modal-card">
 
-            <button id="closeModal"
-                    class="close">
+        <div class="modal-content">
+
+
+            <!-- 閉じる -->
+
+            <button
+                id="closeModal"
+                class="close-button"
+                type="button"
+            >
                 ×
             </button>
 
-            <div class="modal-title">
-                DISCOVERED QUOTE
+
+            <!-- 運勢 -->
+
+            <div
+                id="modalFortune"
+                class="modal-fortune"
+            >
             </div>
 
-            <div id="modalFortune"
-                 class="modal-fortune">
+
+            <!-- 名言 -->
+
+            <div
+                id="modalQuote"
+                class="modal-quote"
+            >
             </div>
 
-            <div id="modalQuote"
-                 class="modal-quote">
+
+            <!-- 作者 -->
+
+            <div
+                id="modalAuthor"
+                class="modal-author"
+            >
             </div>
 
-            <div class="gold-line"></div>
 
-            <div id="modalAuthor"
-                 class="modal-author">
+            <!-- 出典 -->
+
+            <div
+                id="modalSource"
+                class="modal-source"
+            >
             </div>
 
-            <div id="modalSource"
-                 class="modal-source">
-            </div>
 
         </div>
 
     </div>
 
 
-    <footer>
-        今日も一歩、前へ。
+
+    <!-- =========================================
+         設定モーダル
+    ========================================== -->
+
+    <div
+        id="settingsModal"
+        class="settings-modal"
+    >
+
+
+        <div class="settings-box">
+
+
+            <!-- 閉じる -->
+
+            <button
+                id="closeSettings"
+                class="close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+
+            <!-- タイトル -->
+
+            <h2>
+                ⚙️ 応援メッセージ設定
+            </h2>
+
+
+            <p>
+                クールタイム中に表示する<br>
+                応援メッセージを登録できます。
+            </p>
+
+
+            <!-- メッセージ入力欄 -->
+
+            <div
+                id="messageInputs"
+                class="message-inputs"
+            >
+            </div>
+
+
+            <!-- 追加 -->
+
+            <button
+                id="addMessage"
+                class="add-message"
+                type="button"
+            >
+                ＋ メッセージを追加
+            </button>
+
+
+            <!-- 保存 -->
+
+            <button
+                id="saveSettings"
+                class="save-button"
+                type="button"
+            >
+                保存する
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         フッター
+    ========================================== -->
+
+    <footer class="footer">
+
+        <div>
+            ⛩ 学びの御神籤 ⛩
+        </div>
+
+        <small>
+            今日の一歩が、未来につながる。
+        </small>
+
     </footer>
 
-</main>
 
-<script src="script.js"></script>
+
+    <!-- =========================================
+         JavaScript
+    ========================================== -->
+
+    <script
+        src="script.js"
+    ></script>
 
 </body>
+
 </html>
