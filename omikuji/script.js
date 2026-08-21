@@ -1,869 +1,337 @@
-/* =========================================================
-   学びの御神籤 - script.js 完成版
-   ・100種類の御神籤
-   ・日本語の名言＋偉人名
-   ・シークレット対応
-   ・御神籤図鑑
-   ・達成率
-   ・通常クールタイム30分
-   ・重複時はクールタイム25分
-   ・重複ボーナス表示
-   ・応援メッセージはクールタイム中ずっと固定
-   ・本日の課題もクールタイム中ずっと固定
-   ・設定から応援メッセージを登録可能
-========================================================= */
-
 "use strict";
+
+/* =========================================================
+   学びの御神籤
+   script.js 完成版
+   ・名言100種類
+   ・日本語＋偉人名
+   ・吉 / 大吉 / 大大吉 / スーパー大吉 / シークレット
+   ・シークレット出現率 2%
+   ・30分クールタイム
+   ・図鑑＋達成率
+   ・図鑑クリックで名言表示
+   ・学びの神託
+   ・本日の課題
+   ・設定した応援メッセージ
+   ・重複時5分クールタイム短縮
+   ・全100種コンプリート演出
+========================================================= */
 
 
 /* =========================================================
    基本設定
 ========================================================= */
 
-// 通常クールタイム：30分
 const COOLDOWN_TIME = 30 * 60 * 1000;
-
-// 重複時クールタイム：25分
-const DUPLICATE_COOLDOWN_TIME = 25 * 60 * 1000;
-
-
-// localStorage
-const STORAGE_COLLECTION = "studyOmikujiCollection";
-const STORAGE_LAST_DRAW = "studyOmikujiLastDraw";
-const STORAGE_COOLDOWN_DURATION = "studyOmikujiCooldownDuration";
-
-const STORAGE_MESSAGES = "studyOmikujiMessages";
-const STORAGE_CHALLENGE = "studyOmikujiChallenge";
-const STORAGE_SUPPORT = "studyOmikujiCurrentSupport";
+const DUPLICATE_REDUCTION = 5 * 60 * 1000;
 
 
 /* =========================================================
-   デフォルト応援メッセージ
-========================================================= */
-
-const defaultSupportMessages = [
-
-    "今日の努力は、未来の自分へのプレゼントです。",
-
-    "少しだけでも大丈夫。まずは一問から始めよう。",
-
-    "昨日の自分より、一歩前に進めば十分です。",
-
-    "分からない問題があるのは、成長するチャンスです。",
-
-    "焦らなくて大丈夫。自分のペースで進もう。",
-
-    "5分だけ頑張ってみよう。その一歩が大切です。",
-
-    "勉強した分だけ、できることは少しずつ増えていきます。",
-
-    "今日ここまで頑張った自分を、ちゃんと褒めてあげよう。",
-
-    "完璧じゃなくて大丈夫。続けることが一番大切です。",
-
-    "未来の自分が、今日のあなたにきっと感謝します。",
-
-    "一問解けば、一歩前進。",
-
-    "できないことより、できるようになったことを見つけよう。",
-
-    "今日の10分が、明日の自信になります。",
-
-    "まず始める。それだけでも十分すごいことです。",
-
-    "休憩も大切。無理せず自分のペースで進もう。"
-
-];
-
-
-/* =========================================================
-   本日の課題
-========================================================= */
-
-const challengeTasks = [
-
-    "英単語を10個覚える",
-
-    "数学の問題を3問解く",
-
-    "教科書を5ページ読む",
-
-    "漢字を10個覚える",
-
-    "昨日間違えた問題を3問解き直す",
-
-    "英単語を15分勉強する",
-
-    "数学を15分だけ進める",
-
-    "国語の文章を1つ読む",
-
-    "理科の重要語句を5個覚える",
-
-    "社会の重要語句を5個覚える",
-
-    "苦手な問題を1問だけ解いてみる",
-
-    "学校の宿題を1つ終わらせる",
-
-    "ノートを10分見直す",
-
-    "今日習った内容を復習する",
-
-    "明日の授業の予習を10分する",
-
-    "分からない問題を1つ調べる",
-
-    "英語の文章を1つ音読する",
-
-    "公式を3つ覚える",
-
-    "テスト範囲を10分確認する",
-
-    "机に向かって15分集中する",
-
-    "数学の公式を1つ復習する",
-
-    "英単語を5個使って英文を作る",
-
-    "社会の年号を5個確認する",
-
-    "理科の用語を5個確認する",
-
-    "国語の漢字を5個練習する",
-
-    "今日の授業内容を3つ思い出す",
-
-    "苦手教科を10分だけ勉強する",
-
-    "問題集を2ページ進める",
-
-    "授業で分からなかったことを1つ確認する",
-
-    "明日の持ち物と宿題を確認する"
-
-];
-
-
-/* =========================================================
-   名言データ
+   名言100種類
 ========================================================= */
 
 const quotes = [
 
-    ["千里の道も一歩から。", "老子", "大大吉", "『道徳経』"],
-
-    ["学びて時にこれを習う、また説ばしからずや。", "孔子", "大吉", "『論語』"],
-
-    ["知る者は好む者に如かず、好む者は楽しむ者に如かず。", "孔子", "大吉", "『論語』"],
-
-    ["過ちて改めざる、これを過ちという。", "孔子", "大大吉", "『論語』"],
-
-    ["己の欲せざる所、人に施すことなかれ。", "孔子", "中吉", "『論語』"],
-
-    ["学びて思わざれば則ち罔し、思いて学ばざれば則ち殆し。", "孔子", "大吉", "『論語』"],
-
-    ["温故知新。", "孔子", "吉", "『論語』"],
-
-    ["知識への投資は、いつでも最高の利息を生む。", "ベンジャミン・フランクリン", "大吉", "広く知られる言葉"],
-
-    ["失われた時間は、二度と戻らない。", "ベンジャミン・フランクリン", "大吉", "広く帰属される言葉"],
-
-    ["勤勉は幸運の母である。", "ベンジャミン・フランクリン", "中吉", "広く帰属される言葉"],
-
-    ["準備を怠ることは、失敗への準備をすることである。", "ベンジャミン・フランクリン", "大吉", "広く帰属される言葉"],
-
-    ["私たちが恐れるべき唯一のものは、恐怖そのものである。", "フランクリン・D・ルーズベルト", "大吉", "就任演説"],
-
-    ["未来は、自分の夢の美しさを信じる人のものである。", "エレノア・ルーズベルト", "大吉", "広く知られる言葉"],
-
-    ["自分にはできないと思うことを、やってみなさい。", "エレノア・ルーズベルト", "大大吉", "広く知られる言葉"],
-
-    ["何事も、成し遂げるまでは不可能に見える。", "ネルソン・マンデラ", "大吉", "広く知られる言葉"],
-
-    ["教育は、世界を変えるために使える最も強力な武器である。", "ネルソン・マンデラ", "大大吉", "2003年の講演"],
-
-    ["勝者とは、決してあきらめない夢見る人である。", "ネルソン・マンデラ", "大吉", "広く帰属される言葉"],
-
-    ["私は失敗していない。うまくいかない方法を見つけただけだ。", "トーマス・エジソン", "大吉", "広く知られる言葉"],
-
-    ["多くの人がチャンスを逃すのは、それが仕事の姿をしているからだ。", "トーマス・エジソン", "大大吉", "広く知られる言葉"],
-
-    ["天才とは、1パーセントのひらめきと99パーセントの努力である。", "トーマス・エジソン", "大吉", "広く知られる言葉"],
-
-    ["始める方法は、話すことをやめて行動することだ。", "ウォルト・ディズニー", "大吉", "広く知られる言葉"],
-
-    ["夢見ることができるなら、それを実現することもできる。", "ウォルト・ディズニー", "大大吉", "広く帰属される言葉"],
-
-    ["勇気を持って追いかければ、夢は実現できる。", "ウォルト・ディズニー", "大吉", "広く帰属される言葉"],
-
-    ["笑いに時代はなく、想像力に年齢はなく、夢は永遠である。", "ウォルト・ディズニー", "中吉", "広く知られる言葉"],
-
-    ["成功への秘訣は、まず始めることだ。", "マーク・トウェイン", "大吉", "広く帰属される言葉"],
-
-    ["なりたかった自分になるのに、遅すぎることはない。", "ジョージ・エリオット", "大大吉", "広く帰属される言葉"],
-
-    ["情熱なしに偉大なことは何も成し遂げられなかった。", "ラルフ・ワルド・エマーソン", "大吉", "広く知られる言葉"],
-
-    ["道がないところへ行き、道を残しなさい。", "ラルフ・ワルド・エマーソン", "大大吉", "広く帰属される言葉"],
-
-    ["決して、決して、決してあきらめるな。", "ウィンストン・チャーチル", "大大吉", "1941年の演説"],
-
-    ["成功は終わりではなく、失敗は終わりでもない。", "ウィンストン・チャーチル", "大吉", "広く帰属される言葉"],
-
-    ["地獄を通っているなら、そのまま進み続けなさい。", "ウィンストン・チャーチル", "大吉", "広く帰属される言葉"],
-
-    ["大切なのは、疑問を持ち続けることだ。", "アルベルト・アインシュタイン", "大吉", "広く知られる言葉"],
-
-    ["想像力は知識よりも重要である。", "アルベルト・アインシュタイン", "大大吉", "1929年のインタビュー"],
-
-    ["一度も失敗したことがない人は、新しいことを試していない人だ。", "アルベルト・アインシュタイン", "大吉", "広く帰属される言葉"],
-
-    ["人生は自転車に乗るようなものだ。バランスを保つには動き続けなければならない。", "アルベルト・アインシュタイン", "大吉", "1930年の手紙"],
-
-    ["人生において恐れるものは何もない。理解すべきものがあるだけだ。", "マリー・キュリー", "大大吉", "広く知られる言葉"],
-
-    ["未来を予測する最善の方法は、自分で未来をつくることだ。", "ピーター・ドラッカー", "大吉", "広く帰属される言葉"],
-
-    ["何かを信じなければならない。直感、運命、人生、カルマなどを。", "スティーブ・ジョブズ", "大吉", "2005年スタンフォード大学卒業式"],
-
-    ["あなたの時間は限られている。他人の人生を生きるために時間を使ってはいけない。", "スティーブ・ジョブズ", "大大吉", "2005年スタンフォード大学卒業式"],
-
-    ["ハングリーであれ。愚か者であれ。", "スティーブ・ジョブズ", "大吉", "2005年スタンフォード大学卒業式"],
-
-    ["未来は、今日何をするかによって決まる。", "マハトマ・ガンディー", "中吉", "広く帰属される言葉"],
-
-    ["あなたが世界で見たいと思う変化に、あなた自身がなりなさい。", "マハトマ・ガンディー", "大大吉", "広く帰属される言葉"],
-
-    ["力は身体能力から来るのではない。不屈の意志から来る。", "マハトマ・ガンディー", "大吉", "広く帰属される言葉"],
-
-    ["生き残るのは最も強い種ではなく、変化に適応できる種である。", "チャールズ・ダーウィン", "大吉", "広く帰属される言葉"],
-
-    ["学ぶことは、決して心を疲れさせない。", "レオナルド・ダ・ヴィンチ", "大吉", "広く知られる言葉"],
-
-    ["シンプルさは究極の洗練である。", "レオナルド・ダ・ヴィンチ", "大大吉", "広く帰属される言葉"],
-
-    ["天才とは、永遠の忍耐である。", "ミケランジェロ", "大吉", "広く帰属される言葉"],
-
-    ["多くの人にとって最大の危険は、目標が低すぎて達成してしまうことだ。", "ミケランジェロ", "大大吉", "広く帰属される言葉"],
-
-    ["もし私が遠くを見ることができたのなら、巨人の肩の上に立ったからだ。", "アイザック・ニュートン", "大吉", "1675年の手紙"],
-
-    ["人生の幸福は、思考の質に左右される。", "マルクス・アウレリウス", "大吉", "『自省録』"],
-
-    ["あなたの人生は、あなたの思考がつくるものだ。", "マルクス・アウレリウス", "大大吉", "『自省録』"],
-
-    ["困難が行動を妨げることはない。行動することで困難を乗り越える。", "マルクス・アウレリウス", "大吉", "『自省録』"],
-
-    ["経験とは、私たちが失敗につける名前にすぎない。", "オスカー・ワイルド", "大吉", "『ウィンダミア卿夫人の扇』"],
-
-    ["私たちは皆どん底にいる。しかし、星を見上げている者もいる。", "オスカー・ワイルド", "大大吉", "『ウィンダミア卿夫人の扇』"],
-
-    ["創造性は使えば使うほど増えていく。", "マヤ・アンジェロウ", "大大吉", "広く知られる言葉"],
-
-    ["あなたができると思うことから始めなさい。", "ヘンリー・フォード", "大吉", "広く帰属される言葉"],
-
-    ["できると思っても、できないと思っても、どちらも正しい。", "ヘンリー・フォード", "大大吉", "広く帰属される言葉"],
-
-    ["障害とは、目標から目をそらしたときに見えるものだ。", "ヘンリー・フォード", "大吉", "広く帰属される言葉"],
-
-    ["最も重要なのは、行動することだ。", "アメリア・イアハート", "大吉", "広く帰属される言葉"],
-
-    ["最も難しいことは、行動する決断である。", "アメリア・イアハート", "大大吉", "広く帰属される言葉"],
-
-    ["偉大なことを成し遂げるには、行動するだけではなく夢見ることも必要だ。", "アナトール・フランス", "大吉", "広く帰属される言葉"],
-
-    ["一歩ずつ進めば、遠くまで行くことができる。", "日本のことわざ", "大大吉", "ことわざ"],
-
-    ["継続は力なり。", "日本のことわざ", "大吉", "ことわざ"],
-
-    ["雨垂れ石を穿つ。", "日本のことわざ", "吉", "ことわざ"],
-
-    ["失敗は成功のもと。", "日本のことわざ", "大吉", "ことわざ"],
-
-    ["為せば成る、為さねば成らぬ何事も。", "上杉鷹山", "大大吉", "広く知られる言葉"],
-
-    ["初心忘るべからず。", "世阿弥", "大吉", "『花鏡』"],
-
-    ["七転び八起き。", "日本のことわざ", "大大吉", "ことわざ"],
-
-    ["石の上にも三年。", "日本のことわざ", "大吉", "ことわざ"],
-
-    ["努力して結果が出ると、自信になる。", "王貞治", "大吉", "広く知られる言葉"],
-
-    ["小さなことを積み重ねることが、遠くへ行く道になる。", "イチロー", "大吉", "広く知られる言葉"],
-
-    ["特別なことをするために、特別な人間である必要はない。", "イチロー", "大大吉", "広く知られる言葉"],
-
-    ["夢は見るものではなく、かなえるもの。", "大谷翔平", "大吉", "広く知られる言葉"],
-
-    ["自分の可能性を信じることが、最初の一歩だ。", "羽生善治", "大吉", "広く知られる言葉"],
-
-    ["努力を努力と思わないくらい続けることが大切だ。", "羽生善治", "大吉", "広く知られる言葉"],
-
-    ["才能とは、努力を続けられることだ。", "羽生善治", "大大吉", "広く知られる言葉"],
-
-    ["夢なき者に成功なし。", "吉田松陰", "大吉", "広く知られる言葉"],
-
-    ["できることから、まず始めなさい。", "ヨハン・ヴォルフガング・フォン・ゲーテ", "大吉", "広く帰属される言葉"],
-
-    ["今日という日は、二度と戻ってこない。", "ウィリアム・シェイクスピア", "吉", "広く帰属される言葉"],
-
-    ["行動は雄弁である。", "ウィリアム・シェイクスピア", "大吉", "広く帰属される言葉"],
-
-    ["希望は、目覚めている人の夢である。", "アリストテレス", "大吉", "広く帰属される言葉"],
-
-    ["私たちは繰り返し行うことの結果である。", "アリストテレス", "大大吉", "広く帰属される言葉"],
-
-    ["卓越とは一度の行為ではなく、習慣である。", "アリストテレス", "大吉", "広く帰属される言葉"],
-
-    ["学ぶことは人生そのものの一部である。", "プラトン", "大吉", "広く帰属される言葉"],
-
-    ["自分自身を知ることが、知恵の始まりである。", "ソクラテス", "大大吉", "広く帰属される言葉"],
-
-    ["知恵とは、自分が何も知らないと知ることである。", "ソクラテス", "大吉", "広く帰属される言葉"],
-
-    ["疑問を持つことから、学びは始まる。", "ソクラテス", "大吉", "広く帰属される言葉"],
-
-    ["未来は、今この瞬間から変えられる。", "マハトマ・ガンディー", "吉", "広く帰属される言葉"],
-
-    ["努力は必ずしも成功を保証しない。しかし成長を保証する。", "マイケル・ジョーダン", "大吉", "広く知られる言葉"],
-
-    ["私は何度も失敗した。それが成功した理由だ。", "マイケル・ジョーダン", "大大吉", "広く帰属される言葉"],
-
-    ["限界を決めるのは、自分自身だ。", "マイケル・ジョーダン", "大吉", "広く帰属される言葉"],
-
-    ["成功とは、情熱を失わずに失敗から失敗へ進むことである。", "ウィンストン・チャーチル", "大吉", "広く帰属される言葉"],
-
-    ["努力を続ける者に、道は開ける。", "日本のことわざ", "吉", "ことわざ"],
-
-    ["学ぶことをやめたとき、成長も止まる。", "レオナルド・ダ・ヴィンチ", "大吉", "広く帰属される言葉"],
-
-    ["夢を持つことは、未来をつくることだ。", "エレノア・ルーズベルト", "大吉", "広く帰属される言葉"],
-
-    ["今日の小さな一歩が、明日の大きな力になる。", "日本のことわざ", "大大吉", "広く伝わる言葉"],
-
-    /* シークレット */
-
-    ["秘密の扉は、挑戦した者にだけ開かれる。", "学びの御神籤", "シークレット", "特別収録"],
-
-    ["努力の先にある景色は、努力した人にしか見えない。", "学びの御神籤", "シークレット", "特別収録"],
-
-    ["今日の一歩を重ねた者だけが、まだ見ぬ明日へ進める。", "学びの御神籤", "シークレット", "特別収録"],
-
-    ["最後まであきらめなかった人だけが、自分の可能性を知る。", "学びの御神籤", "シークレット", "特別収録"]
+    { id:1, quote:"成功するまで、失敗を重ね続ければいい。", author:"松下幸之助", rarity:"吉" },
+    { id:2, quote:"失敗したところでやめてしまうから失敗になる。成功するまで続ければ、それは成功になる。", author:"松下幸之助", rarity:"大吉" },
+    { id:3, quote:"夢なき者に理想なし。理想なき者に計画なし。計画なき者に実行なし。", author:"吉田松陰", rarity:"大大吉" },
+    { id:4, quote:"為せば成る。為さねば成らぬ何事も。", author:"上杉鷹山", rarity:"吉" },
+    { id:5, quote:"天は人の上に人を造らず、人の下に人を造らず。", author:"福沢諭吉", rarity:"大吉" },
+    { id:6, quote:"学問は身を立てるための大切な力である。", author:"福沢諭吉", rarity:"吉" },
+    { id:7, quote:"志を立てて、以て万事の源となす。", author:"吉田松陰", rarity:"大吉" },
+    { id:8, quote:"人間万事塞翁が馬。", author:"淮南子", rarity:"吉" },
+    { id:9, quote:"少年老い易く学成り難し。一寸の光陰軽んずべからず。", author:"朱熹", rarity:"大吉" },
+    { id:10, quote:"知ることよりも、実際に行うことのほうが大切である。", author:"王陽明", rarity:"吉" },
+
+    { id:11, quote:"学んで時にこれを習う。亦た説ばしからずや。", author:"孔子", rarity:"大吉" },
+    { id:12, quote:"過ちを犯して改めないことこそ、本当の過ちである。", author:"孔子", rarity:"吉" },
+    { id:13, quote:"己の欲せざる所、人に施すことなかれ。", author:"孔子", rarity:"大吉" },
+    { id:14, quote:"知る者は好む者に及ばず。好む者は楽しむ者に及ばない。", author:"孔子", rarity:"大大吉" },
+    { id:15, quote:"学び続ければ、必ず新しい発見がある。", author:"レオナルド・ダ・ヴィンチ", rarity:"吉" },
+    { id:16, quote:"鉄は使わなければ錆び、人の知性も使わなければ衰える。", author:"レオナルド・ダ・ヴィンチ", rarity:"大吉" },
+    { id:17, quote:"簡潔さは究極の洗練である。", author:"レオナルド・ダ・ヴィンチ", rarity:"吉" },
+    { id:18, quote:"障害が大きいほど、それを乗り越えたときの栄光も大きい。", author:"モリエール", rarity:"大吉" },
+    { id:19, quote:"偉大なことをするためには、行動しなければならない。", author:"ミケランジェロ", rarity:"吉" },
+    { id:20, quote:"まだ学ぶべきことがたくさんある。", author:"ミケランジェロ", rarity:"大大吉" },
+
+    { id:21, quote:"できると思えばできる。できないと思えばできない。", author:"ヘンリー・フォード", rarity:"吉" },
+    { id:22, quote:"失敗とは、もう一度始めるための機会である。", author:"ヘンリー・フォード", rarity:"大吉" },
+    { id:23, quote:"集まって考えることは始まり、協力することは進歩、共に働くことは成功である。", author:"ヘンリー・フォード", rarity:"吉" },
+    { id:24, quote:"成功とは、失敗から失敗へ情熱を失わずに進むことである。", author:"ウィンストン・チャーチル", rarity:"大吉" },
+    { id:25, quote:"改善するためには、変わることを恐れてはいけない。", author:"ウィンストン・チャーチル", rarity:"吉" },
+    { id:26, quote:"勇気とは、恐れがないことではなく、恐れより大切なものがあることだ。", author:"ネルソン・マンデラ", rarity:"大大吉" },
+    { id:27, quote:"教育は世界を変えるために使える最も強力な武器である。", author:"ネルソン・マンデラ", rarity:"大吉" },
+    { id:28, quote:"いつも不可能に見えることが、成し遂げられるまでは不可能に見える。", author:"ネルソン・マンデラ", rarity:"吉" },
+    { id:29, quote:"未来は、今日何をするかによって決まる。", author:"マハトマ・ガンディー", rarity:"大吉" },
+    { id:30, quote:"弱い人は許すことができない。許すことは強さの証である。", author:"マハトマ・ガンディー", rarity:"吉" },
+
+    { id:31, quote:"自分が世界に見たい変化そのものになりなさい。", author:"マハトマ・ガンディー", rarity:"大大吉" },
+    { id:32, quote:"偉大な夢を持つ人には、大きな力が宿る。", author:"エレノア・ルーズベルト", rarity:"吉" },
+    { id:33, quote:"未来は、自分の夢を信じる人のものである。", author:"エレノア・ルーズベルト", rarity:"大吉" },
+    { id:34, quote:"自分にはできないと思った瞬間に、可能性を閉ざしてしまう。", author:"エレノア・ルーズベルト", rarity:"吉" },
+    { id:35, quote:"人生で最も重要なのは、挑戦し続けることである。", author:"アルベルト・アインシュタイン", rarity:"大吉" },
+    { id:36, quote:"失敗したことがない人は、新しいことに挑戦したことがない人だ。", author:"アルベルト・アインシュタイン", rarity:"大大吉" },
+    { id:37, quote:"想像力は知識よりも大切である。", author:"アルベルト・アインシュタイン", rarity:"吉" },
+    { id:38, quote:"学ぶことをやめたとき、人は成長することをやめる。", author:"アルベルト・アインシュタイン", rarity:"大吉" },
+    { id:39, quote:"一度に一つのことに集中しなさい。", author:"アレクサンダー・グラハム・ベル", rarity:"吉" },
+    { id:40, quote:"成功への道は、失敗を恐れず歩き続けることにある。", author:"トーマス・エジソン", rarity:"大吉" },
+
+    { id:41, quote:"私は失敗していない。うまくいかない方法を見つけただけだ。", author:"トーマス・エジソン", rarity:"大大吉" },
+    { id:42, quote:"天才とは、一パーセントのひらめきと九十九パーセントの努力である。", author:"トーマス・エジソン", rarity:"吉" },
+    { id:43, quote:"機会を待つのではなく、自分で機会を作りなさい。", author:"ジョージ・バーナード・ショー", rarity:"大吉" },
+    { id:44, quote:"人生は自分で作るものだ。そうでなければ、誰かに作られてしまう。", author:"ジョージ・バーナード・ショー", rarity:"吉" },
+    { id:45, quote:"人生で大切なのは、何を得るかではなく、何になるかである。", author:"ヘンリー・デイヴィッド・ソロー", rarity:"大吉" },
+    { id:46, quote:"夢に向かって自信を持って進みなさい。", author:"ヘンリー・デイヴィッド・ソロー", rarity:"吉" },
+    { id:47, quote:"前へ進むためには、まず一歩を踏み出さなければならない。", author:"マーティン・ルーサー・キング・ジュニア", rarity:"大吉" },
+    { id:48, quote:"正しいことをするために、正しい時を待つ必要はない。", author:"マーティン・ルーサー・キング・ジュニア", rarity:"大大吉" },
+    { id:49, quote:"どんなに暗い夜でも、朝は必ずやってくる。", author:"マーティン・ルーサー・キング・ジュニア", rarity:"吉" },
+    { id:50, quote:"始めることが、成功への第一歩である。", author:"マーク・トウェイン", rarity:"大吉" },
+
+    { id:51, quote:"二十年後、やらなかったことを後悔するだろう。", author:"マーク・トウェイン", rarity:"吉" },
+    { id:52, quote:"努力なしに価値あるものを得ることはできない。", author:"ベンジャミン・フランクリン", rarity:"大吉" },
+    { id:53, quote:"知識への投資は、最高の利息を生む。", author:"ベンジャミン・フランクリン", rarity:"大大吉" },
+    { id:54, quote:"時間を失うことは、人生の一部を失うことである。", author:"ベンジャミン・フランクリン", rarity:"吉" },
+    { id:55, quote:"未来を予測する最善の方法は、自分で未来を作ることだ。", author:"ピーター・ドラッカー", rarity:"大吉" },
+    { id:56, quote:"成果を上げる人は、時間を大切にする。", author:"ピーター・ドラッカー", rarity:"吉" },
+    { id:57, quote:"最も重要なことから始めなさい。", author:"ピーター・ドラッカー", rarity:"大吉" },
+    { id:58, quote:"小さなことを積み重ねることが、とんでもないところへ行くただ一つの道だ。", author:"イチロー", rarity:"大大吉" },
+    { id:59, quote:"努力したことは、すぐには結果にならなくても無駄にはならない。", author:"イチロー", rarity:"吉" },
+    { id:60, quote:"夢をつかむには、夢を持ち続けることが必要だ。", author:"イチロー", rarity:"大吉" },
+
+    { id:61, quote:"自分の限界を決めるのは、自分自身である。", author:"大谷翔平", rarity:"吉" },
+    { id:62, quote:"小さな積み重ねが、大きな結果につながる。", author:"大谷翔平", rarity:"大吉" },
+    { id:63, quote:"目標を持つことで、今やるべきことが見えてくる。", author:"大谷翔平", rarity:"吉" },
+    { id:64, quote:"自分を信じることが、すべての始まりだ。", author:"本田宗一郎", rarity:"大吉" },
+    { id:65, quote:"失敗を恐れてはいけない。失敗から学ぶことが大切だ。", author:"本田宗一郎", rarity:"吉" },
+    { id:66, quote:"やってみなければ、何も始まらない。", author:"本田宗一郎", rarity:"大大吉" },
+    { id:67, quote:"夢を見ることができるなら、それを実現できる。", author:"ウォルト・ディズニー", rarity:"大吉" },
+    { id:68, quote:"すべての夢は、まず小さな一歩から始まる。", author:"ウォルト・ディズニー", rarity:"吉" },
+    { id:69, quote:"困難の中にこそ、チャンスがある。", author:"アルベルト・アインシュタイン", rarity:"大吉" },
+    { id:70, quote:"人生は自転車に乗るようなものだ。バランスを保つには進み続けなければならない。", author:"アルベルト・アインシュタイン", rarity:"大大吉" },
+
+    { id:71, quote:"知識は力である。", author:"フランシス・ベーコン", rarity:"吉" },
+    { id:72, quote:"読むことは人を豊かにし、話すことは人を機敏にし、書くことは人を正確にする。", author:"フランシス・ベーコン", rarity:"大吉" },
+    { id:73, quote:"偉大な仕事は、一人の力だけでは成し遂げられない。", author:"アンドリュー・カーネギー", rarity:"吉" },
+    { id:74, quote:"成功する人は、失敗してもそこから立ち上がる。", author:"アンドリュー・カーネギー", rarity:"大吉" },
+    { id:75, quote:"成功は努力の積み重ねによって生まれる。", author:"ロバート・コリアー", rarity:"吉" },
+    { id:76, quote:"始めることを恐れてはいけない。", author:"デール・カーネギー", rarity:"大吉" },
+    { id:77, quote:"今日という一日を大切に生きなさい。", author:"デール・カーネギー", rarity:"吉" },
+    { id:78, quote:"成功とは、熱意を失わずに失敗から失敗へ進むことである。", author:"ウィンストン・チャーチル", rarity:"大大吉" },
+    { id:79, quote:"未来を恐れる必要はない。今日を大切にすればいい。", author:"マハトマ・ガンディー", rarity:"吉" },
+    { id:80, quote:"努力する人にとって、できないことは学ぶべき課題である。", author:"アリストテレス", rarity:"大吉" },
+
+    { id:81, quote:"私たちは繰り返し行うことによって、自分自身を作っている。", author:"アリストテレス", rarity:"大大吉" },
+    { id:82, quote:"教育の根は苦い。しかし、その果実は甘い。", author:"アリストテレス", rarity:"吉" },
+    { id:83, quote:"始めるのに遅すぎるということはない。", author:"カール・ヒルティ", rarity:"吉" },
+    { id:84, quote:"人生の価値は、何を得たかではなく、何を与えたかで決まる。", author:"アルベルト・アインシュタイン", rarity:"大吉" },
+    { id:85, quote:"自分自身を知ることが、成長の第一歩である。", author:"ソクラテス", rarity:"大大吉" },
+    { id:86, quote:"学ぶことは、自分が何も知らないと知ることから始まる。", author:"ソクラテス", rarity:"吉" },
+    { id:87, quote:"困難は、人を成長させる教師になる。", author:"セネカ", rarity:"大吉" },
+    { id:88, quote:"幸運とは、準備と機会が出会ったときに生まれる。", author:"セネカ", rarity:"吉" },
+    { id:89, quote:"最も大切なのは、今この瞬間にできることをすることだ。", author:"マルクス・アウレリウス", rarity:"大吉" },
+    { id:90, quote:"人生の幸福は、自分の考え方によって決まる。", author:"マルクス・アウレリウス", rarity:"吉" },
+
+    { id:91, quote:"自分にできることから始めればいい。", author:"フリードリヒ・フォン・シラー", rarity:"大吉" },
+    { id:92, quote:"夢を追い続ける勇気こそ、夢を実現する力になる。", author:"パウロ・コエーリョ", rarity:"大大吉" },
+    { id:93, quote:"一歩ずつ進めば、遠い道も必ず近づいてくる。", author:"老子", rarity:"吉" },
+    { id:94, quote:"千里の道も一歩から始まる。", author:"老子", rarity:"大吉" },
+    { id:95, quote:"自分を変えることができれば、世界の見え方も変わる。", author:"レフ・トルストイ", rarity:"吉" },
+    { id:96, quote:"できることを、できる場所で、できる限りやりなさい。", author:"セオドア・ルーズベルト", rarity:"大吉" },
+    { id:97, quote:"何かを成し遂げたいなら、まず自分自身を信じなさい。", author:"ラルフ・ワルド・エマーソン", rarity:"大大吉" },
+    { id:98, quote:"あなたが恐れていることを一つずつ行えば、恐怖は小さくなる。", author:"デール・カーネギー", rarity:"スーパー大吉" },
+    { id:99, quote:"あなたの人生を変える力は、あなた自身の中にある。", author:"マハトマ・ガンディー", rarity:"大大吉" },
+    { id:100, quote:"学び続ける者には、必ず新しい道が開かれる。", author:"学びの神託", rarity:"シークレット" }
 
 ];
 
 
-/* =========================================================
-   名言をオブジェクト化
-========================================================= */
-
-quotes.forEach((q, i) => {
-
-    q.id = i + 1;
-
-    q.quote = q[0];
-
-    q.author = q[1];
-
-    q.fortune = q[2];
-
-    q.source = q[3];
-
-});
+if (quotes.length !== 100) {
+    console.error(`名言数エラー：${quotes.length}個`);
+}
 
 
 /* =========================================================
    DOM
 ========================================================= */
 
-let drawButton;
+const drawButton = document.getElementById("drawButton");
+const quoteElement = document.getElementById("quote");
+const authorElement = document.getElementById("author");
+const fortuneElement = document.getElementById("fortune");
+const cooldownElement = document.getElementById("cooldown");
+const cooldownMessage = document.getElementById("cooldownMessage");
+const bookGrid = document.getElementById("bookGrid");
+const achievementRate = document.getElementById("achievementRate");
+const achievementCount = document.getElementById("achievementCount");
+const progressBar = document.getElementById("progressBar");
 
-let fortuneElement;
-let quoteElement;
-let authorElement;
+const settingsButton = document.getElementById("settingsButton");
+const settingsModal = document.getElementById("settingsModal");
+const closeSettings = document.getElementById("closeSettings");
+const addMessageButton = document.getElementById("addMessage");
+const saveSettingsButton = document.getElementById("saveSettings");
+const messageInputs = document.getElementById("messageInputs");
 
-let cooldownElement;
-let cooldownMessageElement;
-
-let bookGrid;
-
-let achievementRate;
-let achievementCount;
-let progressBar;
-
-let modal;
-let closeModal;
-
-let modalFortune;
-let modalQuote;
-let modalAuthor;
-let modalSource;
-
-let settingsButton;
-let settingsModal;
-let closeSettings;
-
-let addMessage;
-let saveSettings;
-let messageInputs;
+const modal = document.getElementById("modal");
+const closeModal = document.getElementById("closeModal");
+const modalQuote = document.getElementById("modalQuote");
+const modalAuthor = document.getElementById("modalAuthor");
+const modalFortune = document.getElementById("modalFortune");
+const modalSource = document.getElementById("modalSource");
 
 
 /* =========================================================
-   状態
+   LocalStorage
 ========================================================= */
 
-let collected = [];
-
-let lastDraw = 0;
-
-let currentCooldownDuration = COOLDOWN_TIME;
-
-let supportMessages = [];
-
-let currentSupportMessage = "";
-
-let todayChallenge = "";
+const STORAGE_KEYS = {
+    collection: "manabiOmikujiCollection",
+    cooldown: "manabiOmikujiCooldown",
+    messages: "manabiOmikujiMessages",
+    currentQuote: "manabiOmikujiCurrentQuote",
+    challenge: "manabiOmikujiChallenge",
+    cooldownSupport: "manabiOmikujiCooldownSupport",
+    completed: "manabiOmikujiCompleted"
+};
 
 
 /* =========================================================
-   初期化
+   図鑑
 ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    initialize
-);
+function getCollection() {
 
+    try {
 
-function initialize() {
-
-    drawButton =
-        document.getElementById("drawButton");
-
-    fortuneElement =
-        document.getElementById("fortune");
-
-    quoteElement =
-        document.getElementById("quote");
-
-    authorElement =
-        document.getElementById("author");
-
-    cooldownElement =
-        document.getElementById("cooldown");
-
-    cooldownMessageElement =
-        document.getElementById("cooldownMessage");
-
-    bookGrid =
-        document.getElementById("bookGrid");
-
-    achievementRate =
-        document.getElementById("achievementRate");
-
-    achievementCount =
-        document.getElementById("achievementCount");
-
-    progressBar =
-        document.getElementById("progressBar");
-
-
-    modal =
-        document.getElementById("modal");
-
-    closeModal =
-        document.getElementById("closeModal");
-
-    modalFortune =
-        document.getElementById("modalFortune");
-
-    modalQuote =
-        document.getElementById("modalQuote");
-
-    modalAuthor =
-        document.getElementById("modalAuthor");
-
-    modalSource =
-        document.getElementById("modalSource");
-
-
-    settingsButton =
-        document.getElementById("settingsButton");
-
-    settingsModal =
-        document.getElementById("settingsModal");
-
-    closeSettings =
-        document.getElementById("closeSettings");
-
-    addMessage =
-        document.getElementById("addMessage");
-
-    saveSettings =
-        document.getElementById("saveSettings");
-
-    messageInputs =
-        document.getElementById("messageInputs");
-
-
-    collected =
-        loadCollection();
-
-
-    lastDraw =
-        Number(
+        const data = JSON.parse(
             localStorage.getItem(
-                STORAGE_LAST_DRAW
+                STORAGE_KEYS.collection
             )
-        ) || 0;
+        );
 
+        return Array.isArray(data) ? data : [];
 
-    currentCooldownDuration =
-        Number(
-            localStorage.getItem(
-                STORAGE_COOLDOWN_DURATION
-            )
-        ) || COOLDOWN_TIME;
+    } catch {
 
-
-    if (
-        currentCooldownDuration !==
-            COOLDOWN_TIME &&
-        currentCooldownDuration !==
-            DUPLICATE_COOLDOWN_TIME
-    ) {
-
-        currentCooldownDuration =
-            COOLDOWN_TIME;
+        return [];
 
     }
+}
 
 
-    supportMessages =
-        loadMessages();
+function saveCollection(collection) {
 
-
-    todayChallenge =
-        localStorage.getItem(
-            STORAGE_CHALLENGE
-        ) || "";
-
-
-    currentSupportMessage =
-        localStorage.getItem(
-            STORAGE_SUPPORT
-        ) || "";
-
-
-    setupEvents();
-
-
-    updateBook();
-
-    updateAchievement();
-
-    updateCooldown();
-
-
-    setInterval(
-        updateCooldown,
-        1000
+    localStorage.setItem(
+        STORAGE_KEYS.collection,
+        JSON.stringify(collection)
     );
 
 }
 
 
 /* =========================================================
-   イベント
+   クールタイム
 ========================================================= */
 
-function setupEvents() {
+function getCooldownEnd() {
 
-    if (drawButton) {
+    return Number(
+        localStorage.getItem(
+            STORAGE_KEYS.cooldown
+        )
+    ) || 0;
 
-        drawButton.addEventListener(
-            "click",
-            drawOmikuji
-        );
+}
 
+
+function setCooldown() {
+
+    const end =
+        Date.now() + COOLDOWN_TIME;
+
+    localStorage.setItem(
+        STORAGE_KEYS.cooldown,
+        String(end)
+    );
+
+    return end;
+
+}
+
+
+function isCooldown() {
+
+    return getCooldownEnd() > Date.now();
+
+}
+
+
+function reduceCooldown(minutes = 5) {
+
+    const end = getCooldownEnd();
+
+    if (end <= Date.now()) {
+        return;
     }
 
+    const newEnd = Math.max(
+        Date.now(),
+        end - minutes * 60 * 1000
+    );
 
-    if (closeModal) {
-
-        closeModal.addEventListener(
-            "click",
-            closeQuoteModal
-        );
-
-    }
-
-
-    if (modal) {
-
-        modal.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target === modal
-                ) {
-
-                    closeQuoteModal();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (settingsButton) {
-
-        settingsButton.addEventListener(
-            "click",
-            openSettings
-        );
-
-    }
-
-
-    if (closeSettings) {
-
-        closeSettings.addEventListener(
-            "click",
-            closeSettingsModal
-        );
-
-    }
-
-
-    if (settingsModal) {
-
-        settingsModal.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target ===
-                    settingsModal
-                ) {
-
-                    closeSettingsModal();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (addMessage) {
-
-        addMessage.addEventListener(
-            "click",
-            () => {
-
-                createMessageInput("");
-
-            }
-        );
-
-    }
-
-
-    if (saveSettings) {
-
-        saveSettings.addEventListener(
-            "click",
-            saveSupportMessages
-        );
-
-    }
-
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (event.key === "Escape") {
-
-                closeQuoteModal();
-
-                closeSettingsModal();
-
-            }
-
-        }
+    localStorage.setItem(
+        STORAGE_KEYS.cooldown,
+        String(newEnd)
     );
 
 }
 
 
 /* =========================================================
-   御神籤を引く
+   時間
 ========================================================= */
 
-function drawOmikuji() {
+function formatTime(ms) {
 
-    if (isCooldown()) {
-
-        updateCooldown();
-
-        return;
-
+    if (ms <= 0) {
+        return "0:00";
     }
 
+    const seconds =
+        Math.ceil(ms / 1000);
+
+    const minutes =
+        Math.floor(seconds / 60);
+
+    const remainSeconds =
+        seconds % 60;
+
+    return (
+        `${minutes}:` +
+        `${String(remainSeconds).padStart(2, "0")}`
+    );
+
+}
+
+
+/* =========================================================
+   ランダム
+========================================================= */
+
+function randomItem(array) {
 
     if (
-        !drawButton ||
-        quotes.length === 0
+        !Array.isArray(array) ||
+        array.length === 0
     ) {
-
-        return;
-
+        return null;
     }
 
-
-    drawButton.disabled = true;
-
-    drawButton.textContent =
-        "🎋 引いています…";
-
-
-    setTimeout(() => {
-
-        const item =
-            getRandomQuote();
-
-
-        /*
-         * 重要
-         *
-         * 登録前に確認する。
-         *
-         * これによって、
-         * 「すでに持っている名言」
-         * なのかを正しく判断できる。
-         */
-
-        const isDuplicate =
-            collected.includes(item.id);
-
-
-        /*
-         * 結果表示
-         */
-
-        showResult(item);
-
-
-        /*
-         * 図鑑登録
-         *
-         * 重複なら何も追加されない。
-         */
-
-        registerQuote(item.id);
-
-
-        /*
-         * クールタイムを決定
-         *
-         * 初回 → 30分
-         * 重複 → 25分
-         */
-
-        if (isDuplicate) {
-
-            currentCooldownDuration =
-                DUPLICATE_COOLDOWN_TIME;
-
-        } else {
-
-            currentCooldownDuration =
-                COOLDOWN_TIME;
-
-        }
-
-
-        /*
-         * クールタイム開始時刻
-         */
-
-        lastDraw =
-            Date.now();
-
-
-        /*
-         * 保存
-         */
-
-        localStorage.setItem(
-            STORAGE_LAST_DRAW,
-            String(lastDraw)
-        );
-
-
-        localStorage.setItem(
-            STORAGE_COOLDOWN_DURATION,
-            String(
-                currentCooldownDuration
-            )
-        );
-
-
-        /*
-         * クールタイム中に表示する
-         * 課題を決定
-         */
-
-        createTodayChallenge();
-
-
-        /*
-         * 学びの神託を1回だけ決定
-         */
-
-        chooseSupportMessage();
-
-
-        /*
-         * 画面更新
-         */
-
-        updateBook();
-
-        updateAchievement();
-
-        updateCooldown();
-
-
-        /*
-         * 重複だった場合
-         * ボーナス表示
-         */
-
-        if (isDuplicate) {
-
-            showDuplicateNotification();
-
-        }
-
-
-        /*
-         * レアリティ演出
-         */
-
-        playRarityEffect(item);
-
-
-    }, 500);
+    return array[
+        Math.floor(
+            Math.random() * array.length
+        )
+    ];
 
 }
 
@@ -872,90 +340,71 @@ function drawOmikuji() {
    レアリティ抽選
 ========================================================= */
 
-function getRandomQuote() {
+function drawQuote() {
 
-    const secretQuotes =
-        quotes.filter(
-            q =>
-                q.fortune ===
-                "シークレット"
-        );
+    const random = Math.random();
 
+    let rarity;
 
-    const normalQuotes =
-        quotes.filter(
-            q =>
-                q.fortune !==
-                "シークレット"
-        );
+    if (random < 0.02) {
 
+        rarity = "シークレット";
 
-    /*
-     * シークレット：約2%
-     */
+    } else if (random < 0.07) {
 
-    if (
-        secretQuotes.length > 0 &&
-        Math.random() < 0.02
-    ) {
+        rarity = "スーパー大吉";
 
-        return secretQuotes[
-            Math.floor(
-                Math.random() *
-                secretQuotes.length
-            )
-        ];
+    } else if (random < 0.20) {
+
+        rarity = "大大吉";
+
+    } else if (random < 0.55) {
+
+        rarity = "大吉";
+
+    } else {
+
+        rarity = "吉";
 
     }
 
+    const candidates =
+        quotes.filter(
+            quote =>
+                quote.rarity === rarity
+        );
 
-    return normalQuotes[
-        Math.floor(
-            Math.random() *
-            normalQuotes.length
-        )
-    ];
+    return (
+        randomItem(candidates) ||
+        randomItem(quotes)
+    );
 
 }
 
 
 /* =========================================================
-   結果表示
+   名言表示
 ========================================================= */
 
-function showResult(item) {
+function displayQuote(item) {
+
+    if (!item) {
+        return;
+    }
 
     if (fortuneElement) {
-
         fortuneElement.textContent =
-            item.fortune;
-
-
-        fortuneElement.className =
-            "";
-
-
-        fortuneElement.classList.add(
-            "rarity-" +
-            item.fortune
-        );
-
+            item.rarity;
     }
-
 
     if (quoteElement) {
-
         quoteElement.textContent =
             `「${item.quote}」`;
-
     }
 
-
     if (authorElement) {
-
         authorElement.textContent =
             `― ${item.author}`;
-
     }
 
 }
@@ -965,137 +414,42 @@ function showResult(item) {
    図鑑登録
 ========================================================= */
 
-function registerQuote(id) {
+function registerQuote(item) {
 
-    /*
-     * すでに登録済みなら終了
-     *
-     * これにより重複時に
-     * 達成率が増えない。
-     */
+    const collection =
+        getCollection();
 
-    if (
-        collected.includes(id)
-    ) {
+    const alreadyCollected =
+        collection.includes(item.id);
 
-        return;
+    if (!alreadyCollected) {
 
-    }
+        collection.push(item.id);
 
+        saveCollection(collection);
 
-    collected.push(id);
+        showCollectionNotification(item);
 
+    } else {
 
-    collected.sort(
-        (a, b) => a - b
-    );
+        /*
+         * 同じ御神籤が出た場合
+         * クールタイムを5分短縮
+         */
 
+        if (isCooldown()) {
 
-    localStorage.setItem(
-        STORAGE_COLLECTION,
-        JSON.stringify(collected)
-    );
+            reduceCooldown(5);
 
-}
-
-
-/* =========================================================
-   図鑑表示
-========================================================= */
-
-function updateBook() {
-
-    if (!bookGrid) {
-
-        return;
-
-    }
-
-
-    bookGrid.innerHTML = "";
-
-
-    quotes.forEach(item => {
-
-        const card =
-            document.createElement(
-                "div"
-            );
-
-
-        card.className =
-            "book-card";
-
-
-        const unlocked =
-            collected.includes(
-                item.id
-            );
-
-
-        if (unlocked) {
-
-            card.classList.add(
-                "unlocked"
-            );
-
-
-            card.innerHTML = `
-
-                <div class="book-number">
-                    No.${String(item.id).padStart(3, "0")}
-                </div>
-
-                <div class="book-fortune">
-                    ${escapeHTML(item.fortune)}
-                </div>
-
-                <div class="book-author">
-                    ${escapeHTML(item.author)}
-                </div>
-
-            `;
-
-
-            /*
-             * 登録済みの御神籤をクリックすると
-             * 名言の詳細を表示
-             */
-
-            card.addEventListener(
-                "click",
-                () => {
-
-                    openQuoteModal(item);
-
-                }
-            );
-
-        } else {
-
-            card.classList.add(
-                "locked"
-            );
-
-
-            card.innerHTML = `
-
-                <div class="book-number">
-                    No.${String(item.id).padStart(3, "0")}
-                </div>
-
-                <div class="lock">
-                    🔒
-                </div>
-
-            `;
+            showDuplicateNotification();
 
         }
 
+    }
 
-        bookGrid.appendChild(card);
+    renderBook();
 
-    });
+    checkCompletion();
 
 }
 
@@ -1106,102 +460,150 @@ function updateBook() {
 
 function updateAchievement() {
 
-    const current =
-        collected.length;
+    const collection =
+        getCollection();
 
+    const count =
+        collection.length;
 
-    const total =
-        quotes.length;
-
-
-    if (total <= 0) {
-
-        return;
-
-    }
-
-
-    const percentage =
-        Math.floor(
-            (current / total) *
-            100
+    const rate =
+        Math.round(
+            count / quotes.length * 100
         );
 
-
     if (achievementRate) {
-
         achievementRate.textContent =
-            `${percentage}%`;
-
+            `${rate}%`;
     }
-
 
     if (achievementCount) {
-
         achievementCount.textContent =
-            `${current} / ${total}`;
-
+            `${count} / ${quotes.length}`;
     }
 
-
     if (progressBar) {
-
         progressBar.style.width =
-            `${percentage}%`;
-
+            `${rate}%`;
     }
 
 }
 
 
 /* =========================================================
-   名言モーダル
+   図鑑描画
+========================================================= */
+
+function renderBook() {
+
+    if (!bookGrid) {
+        return;
+    }
+
+    const collection =
+        getCollection();
+
+    bookGrid.innerHTML = "";
+
+    quotes.forEach(item => {
+
+        const unlocked =
+            collection.includes(item.id);
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "book-card";
+
+        if (unlocked) {
+
+            card.classList.add(
+                "unlocked"
+            );
+
+            card.innerHTML = `
+                <div class="book-number">
+                    NO.${String(item.id).padStart(3, "0")}
+                </div>
+
+                <div class="book-fortune">
+                    ${item.rarity}
+                </div>
+
+                <div class="book-author">
+                    ${item.author}
+                </div>
+            `;
+
+            card.addEventListener(
+                "click",
+                () => {
+                    openQuoteModal(item);
+                }
+            );
+
+        } else {
+
+            card.classList.add(
+                "locked"
+            );
+
+            card.innerHTML = `
+                <div class="lock">
+                    🔒
+                </div>
+
+                <div class="book-number">
+                    NO.${String(item.id).padStart(3, "0")}
+                </div>
+
+                <div class="book-author">
+                    未登録
+                </div>
+            `;
+
+        }
+
+        bookGrid.appendChild(card);
+
+    });
+
+    updateAchievement();
+
+}
+
+
+/* =========================================================
+   図鑑詳細
 ========================================================= */
 
 function openQuoteModal(item) {
 
     if (!modal) {
-
         return;
-
     }
-
 
     if (modalFortune) {
-
         modalFortune.textContent =
-            item.fortune;
-
+            item.rarity;
     }
-
 
     if (modalQuote) {
-
         modalQuote.textContent =
             `「${item.quote}」`;
-
     }
-
 
     if (modalAuthor) {
-
         modalAuthor.textContent =
             `― ${item.author}`;
-
     }
-
 
     if (modalSource) {
-
         modalSource.textContent =
-            `出典：${item.source}`;
-
+            "図鑑に登録された御神籤";
     }
 
-
-    modal.classList.add(
-        "open"
-    );
+    modal.classList.add("open");
 
 }
 
@@ -1209,249 +611,782 @@ function openQuoteModal(item) {
 function closeQuoteModal() {
 
     if (modal) {
+        modal.classList.remove("open");
+    }
 
-        modal.classList.remove(
-            "open"
+}
+
+
+/* =========================================================
+   通知
+========================================================= */
+
+function showCollectionNotification(item) {
+
+    let notification =
+        document.querySelector(
+            ".collection-effect"
+        );
+
+    if (!notification) {
+
+        notification =
+            document.createElement("div");
+
+        notification.className =
+            "collection-effect";
+
+        document.body.appendChild(
+            notification
         );
 
     }
 
+    notification.textContent =
+        `✦ ${item.rarity}を図鑑に登録しました`;
+
+    notification.classList.add("show");
+
+    setTimeout(
+        () => {
+            notification.classList.remove("show");
+        },
+        3000
+    );
+
 }
 
 
-/* =========================================================
-   クールタイム
-========================================================= */
+function showDuplicateNotification() {
 
-function isCooldown() {
+    let notification =
+        document.querySelector(
+            ".duplicate-notification"
+        );
 
-    if (!lastDraw) {
+    if (!notification) {
 
-        return false;
+        notification =
+            document.createElement("div");
+
+        notification.className =
+            "duplicate-notification";
+
+        notification.innerHTML = `
+            <div class="duplicate-title">
+                ✦ 重複の神託 ✦
+            </div>
+
+            <div class="duplicate-text">
+                すでに持っている御神籤でした。
+            </div>
+
+            <div class="duplicate-bonus">
+                クールタイムを5分短縮しました
+            </div>
+        `;
+
+        document.body.appendChild(
+            notification
+        );
 
     }
 
+    notification.classList.add("show");
 
-    return (
-        Date.now() -
-        lastDraw <
-        currentCooldownDuration
+    setTimeout(
+        () => {
+            notification.classList.remove("show");
+        },
+        3500
     );
 
 }
 
 
 /* =========================================================
-   残り時間
+   全100種コンプリート判定
 ========================================================= */
 
-function getRemainingTime() {
+function checkCompletion() {
 
-    if (!lastDraw) {
+    const collection =
+        getCollection();
 
-        return 0;
-
-    }
-
-
-    return Math.max(
-
-        0,
-
-        currentCooldownDuration -
-        (
-            Date.now() -
-            lastDraw
-        )
-
-    );
-
-}
-
-
-/* =========================================================
-   クールタイム表示
-========================================================= */
-
-function updateCooldown() {
-
-    const remaining =
-        getRemainingTime();
-
-
-    /*
-     * クールタイム終了
-     */
-
-    if (remaining <= 0) {
-
-        if (drawButton) {
-
-            drawButton.disabled =
-                false;
-
-
-            drawButton.textContent =
-                "🎋 御神籤を引く";
-
-        }
-
-
-        if (cooldownElement) {
-
-            cooldownElement.textContent =
-                "✨ 御神籤を引くことができます";
-
-        }
-
-
-        finishCooldown();
-
+    if (collection.length < 100) {
         return;
-
     }
 
-
-    /*
-     * クールタイム中
-     */
-
-    if (drawButton) {
-
-        drawButton.disabled =
-            true;
-
-
-        drawButton.textContent =
-            "⏳ 次の御神籤まで待機";
-
-    }
-
-
-    const totalSeconds =
-        Math.ceil(
-            remaining / 1000
-        );
-
-
-    const minutes =
-        Math.floor(
-            totalSeconds / 60
-        );
-
-
-    const seconds =
-        totalSeconds % 60;
-
-
-    if (cooldownElement) {
-
-        cooldownElement.textContent =
-            `次の御神籤まで ${minutes}分 ${String(seconds).padStart(2, "0")}秒`;
-
-    }
-
-
-    /*
-     * 課題はクールタイム中に
-     * まだ決まっていなければ決定。
-     */
-
-    if (!todayChallenge) {
-
-        createTodayChallenge();
-
-    }
-
-
-    /*
-     * 応援メッセージは
-     * クールタイム中に変更しない。
-     */
-
-    if (!currentSupportMessage) {
-
-        chooseSupportMessage();
-
-    }
-
-
-    showCooldownContent();
-
-}
-
-
-/* =========================================================
-   クールタイム終了
-========================================================= */
-
-function finishCooldown() {
-
-    todayChallenge = "";
-
-    currentSupportMessage = "";
-
-
-    localStorage.removeItem(
-        STORAGE_CHALLENGE
-    );
-
-
-    localStorage.removeItem(
-        STORAGE_SUPPORT
-    );
-
-
-    localStorage.removeItem(
-        STORAGE_COOLDOWN_DURATION
-    );
-
-
-    currentCooldownDuration =
-        COOLDOWN_TIME;
-
-
-    if (cooldownMessageElement) {
-
-        cooldownMessageElement.style.display =
-            "none";
-
-    }
-
-}
-
-
-/* =========================================================
-   本日の課題
-========================================================= */
-
-function createTodayChallenge() {
-
-    /*
-     * すでに決まっていたら変更しない。
-     */
-
-    if (todayChallenge) {
-
+    if (
+        localStorage.getItem(
+            STORAGE_KEYS.completed
+        ) === "true"
+    ) {
         return;
-
     }
-
-
-    const index =
-        Math.floor(
-            Math.random() *
-            challengeTasks.length
-        );
-
-
-    todayChallenge =
-        challengeTasks[index];
-
 
     localStorage.setItem(
-        STORAGE_CHALLENGE,
-        todayChallenge
+        STORAGE_KEYS.completed,
+        "true"
+    );
+
+    playCompletionEffect();
+
+}
+
+
+/* =========================================================
+   全コンプリート演出
+   HTMLを変更せずJavaScriptだけで生成
+========================================================= */
+
+function playCompletionEffect() {
+
+    let overlay =
+        document.getElementById(
+            "completionEffect"
+        );
+
+    if (overlay) {
+        return;
+    }
+
+    overlay =
+        document.createElement("div");
+
+    overlay.id =
+        "completionEffect";
+
+    overlay.innerHTML = `
+
+        <div class="completion-particles">
+            <span>✦</span>
+            <span>✧</span>
+            <span>✨</span>
+            <span>✦</span>
+            <span>⛩</span>
+            <span>✧</span>
+            <span>✨</span>
+        </div>
+
+        <div class="completion-inner">
+
+            <div class="completion-torii">
+                ⛩
+            </div>
+
+            <div class="completion-kamon">
+                ✦
+            </div>
+
+            <div class="completion-title">
+                全100種コンプリート
+            </div>
+
+            <div class="completion-subtitle">
+                満願成就
+            </div>
+
+            <div class="completion-message">
+                すべての御神籤を集めました。<br>
+                ここまで歩んだ学びの道を、
+                どうか誇りにしてください。
+            </div>
+
+            <div class="completion-complete">
+                100 / 100
+            </div>
+
+            <button
+                type="button"
+                class="completion-close"
+            >
+                神託を受け取る
+            </button>
+
+        </div>
+    `;
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    const style =
+        document.createElement("style");
+
+    style.id =
+        "completionEffectStyle";
+
+    style.textContent = `
+
+        #completionEffect {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 99999;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(
+                        112,
+                        67,
+                        25,
+                        0.35
+                    ),
+                    rgba(
+                        8,
+                        3,
+                        2,
+                        0.96
+                    )
+                );
+
+            backdrop-filter:
+                blur(10px);
+
+            animation:
+                completionFadeIn
+                .8s ease both;
+
+            overflow: hidden;
+        }
+
+
+        #completionEffect::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 75vmin;
+
+            height: 75vmin;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(
+                        245,
+                        223,
+                        145,
+                        0.30
+                    ),
+                    transparent 68%
+                );
+
+            animation:
+                completionGlow
+                4s
+                ease-in-out
+                infinite;
+        }
+
+
+        #completionEffect::after {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 15px;
+
+            border:
+                1px solid
+                rgba(
+                    217,
+                    180,
+                    91,
+                    0.22
+                );
+
+            pointer-events: none;
+        }
+
+
+        .completion-inner {
+
+            position: relative;
+
+            z-index: 2;
+
+            width:
+                min(680px, 100%);
+
+            padding:
+                50px 30px;
+
+            text-align: center;
+
+            color:
+                #fff7df;
+
+            border:
+                1px solid
+                #d9b45b;
+
+            border-radius:
+                20px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(
+                        91,
+                        37,
+                        25,
+                        .98
+                    ),
+                    rgba(
+                        28,
+                        11,
+                        8,
+                        .98
+                    )
+                );
+
+            box-shadow:
+
+                0 30px 90px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .75
+                ),
+
+                0 0 55px
+                rgba(
+                    245,
+                    223,
+                    145,
+                    .28
+                ),
+
+                inset 0 0 55px
+                rgba(
+                    245,
+                    223,
+                    145,
+                    .06
+                );
+
+            animation:
+                completionRise
+                .9s
+                cubic-bezier(
+                    .2,
+                    .8,
+                    .2,
+                    1
+                )
+                both;
+        }
+
+
+        .completion-torii {
+
+            font-size:
+                clamp(
+                    44px,
+                    10vw,
+                    70px
+                );
+
+            color:
+                #f5df91;
+
+            filter:
+                drop-shadow(
+                    0 0 18px
+                    rgba(
+                        245,
+                        223,
+                        145,
+                        .55
+                    )
+                );
+        }
+
+
+        .completion-kamon {
+
+            margin:
+                8px 0 14px;
+
+            font-size:
+                30px;
+
+            color:
+                #f5df91;
+        }
+
+
+        .completion-title {
+
+            font-size:
+                clamp(
+                    1.9rem,
+                    7vw,
+                    3.5rem
+                );
+
+            font-weight:
+                bold;
+
+            letter-spacing:
+                .12em;
+
+            color:
+                #f5df91;
+
+            text-shadow:
+                0 0 25px
+                rgba(
+                    245,
+                    223,
+                    145,
+                    .3
+                );
+        }
+
+
+        .completion-subtitle {
+
+            margin-top:
+                12px;
+
+            font-size:
+                1.3rem;
+
+            letter-spacing:
+                .35em;
+
+            color:
+                #d9b45b;
+        }
+
+
+        .completion-message {
+
+            margin:
+                28px auto 20px;
+
+            line-height:
+                2;
+
+            letter-spacing:
+                .08em;
+
+            color:
+                #fffaf0;
+        }
+
+
+        .completion-complete {
+
+            margin:
+                15px 0 28px;
+
+            font-size:
+                1.7rem;
+
+            font-weight:
+                bold;
+
+            color:
+                #f5df91;
+
+            letter-spacing:
+                .15em;
+        }
+
+
+        .completion-close {
+
+            padding:
+                14px 35px;
+
+            border:
+                1px solid
+                #d9b45b;
+
+            border-radius:
+                9px;
+
+            color:
+                #3b1b0f;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5df91,
+                    #c69b46
+                );
+
+            font:
+                inherit;
+
+            font-weight:
+                bold;
+
+            letter-spacing:
+                .08em;
+
+            cursor:
+                pointer;
+
+            box-shadow:
+                0 5px 0
+                #76521d;
+
+            transition:
+                .2s;
+        }
+
+
+        .completion-close:hover {
+
+            filter:
+                brightness(1.08);
+
+            transform:
+                translateY(-2px);
+        }
+
+
+        .completion-close:active {
+
+            transform:
+                translateY(3px);
+
+            box-shadow:
+                0 2px 0
+                #76521d;
+        }
+
+
+        .completion-particles span {
+
+            position:
+                absolute;
+
+            color:
+                #f5df91;
+
+            font-size:
+                24px;
+
+            animation:
+                completionParticle
+                3.5s
+                ease-in-out
+                infinite;
+        }
+
+
+        .completion-particles span:nth-child(1) {
+            top: 15%;
+            left: 15%;
+        }
+
+        .completion-particles span:nth-child(2) {
+            top: 25%;
+            right: 18%;
+            animation-delay: .5s;
+        }
+
+        .completion-particles span:nth-child(3) {
+            top: 65%;
+            left: 12%;
+            animation-delay: 1s;
+        }
+
+        .completion-particles span:nth-child(4) {
+            bottom: 15%;
+            right: 14%;
+            animation-delay: 1.5s;
+        }
+
+        .completion-particles span:nth-child(5) {
+            top: 10%;
+            left: 50%;
+            animation-delay: .8s;
+        }
+
+        .completion-particles span:nth-child(6) {
+            bottom: 20%;
+            left: 28%;
+            animation-delay: 1.2s;
+        }
+
+        .completion-particles span:nth-child(7) {
+            top: 45%;
+            right: 8%;
+            animation-delay: 1.8s;
+        }
+
+
+        @keyframes completionFadeIn {
+
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+
+        }
+
+
+        @keyframes completionRise {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(40px)
+                    scale(.94);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+
+            }
+
+        }
+
+
+        @keyframes completionGlow {
+
+            0%,
+            100% {
+
+                transform:
+                    scale(.85);
+
+                opacity:
+                    .45;
+
+            }
+
+            50% {
+
+                transform:
+                    scale(1.15);
+
+                opacity:
+                    1;
+
+            }
+
+        }
+
+
+        @keyframes completionParticle {
+
+            0%,
+            100% {
+
+                transform:
+                    translateY(15px)
+                    scale(.7)
+                    rotate(0deg);
+
+                opacity:
+                    .2;
+
+            }
+
+            50% {
+
+                transform:
+                    translateY(-25px)
+                    scale(1.3)
+                    rotate(180deg);
+
+                opacity:
+                    1;
+
+            }
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            .completion-inner {
+
+                padding:
+                    40px 20px;
+
+            }
+
+            .completion-message {
+
+                font-size:
+                    .9rem;
+
+            }
+
+            .completion-subtitle {
+
+                font-size:
+                    1rem;
+
+            }
+
+        }
+
+    `;
+
+    document.head.appendChild(
+        style
+    );
+
+
+    const closeButton =
+        overlay.querySelector(
+            ".completion-close"
+        );
+
+    closeButton.addEventListener(
+        "click",
+        () => {
+
+            overlay.remove();
+
+            const completionStyle =
+                document.getElementById(
+                    "completionEffectStyle"
+                );
+
+            if (completionStyle) {
+                completionStyle.remove();
+            }
+
+        }
     );
 
 }
@@ -1461,168 +1396,438 @@ function createTodayChallenge() {
    学びの神託
 ========================================================= */
 
-function chooseSupportMessage() {
+const defaultSupportMessages = [
 
-    const messages =
-        supportMessages.length > 0
-            ? supportMessages
-            : defaultSupportMessages;
+    "少しだけでも机に向かえば、それは前進です。",
+    "今日の一問が、未来の自分を助けます。",
+    "完璧じゃなくて大丈夫。まず一つ終わらせよう。",
+    "5分だけ集中してみよう。始めれば流れができます。",
+    "昨日の自分より、一歩だけ前へ。",
+    "わからない問題は、成長するチャンスです。",
+    "今できることを、一つずつ進めよう。",
+    "努力はすぐに見えなくても、確実に積み重なっています。",
+    "今日の努力は、未来の自分への贈り物です。",
+    "焦らなくて大丈夫。自分のペースで進もう。"
 
-
-    const index =
-        Math.floor(
-            Math.random() *
-            messages.length
-        );
-
-
-    currentSupportMessage =
-        messages[index];
+];
 
 
-    /*
-     * 一度決めたら、
-     * クールタイムが終わるまで
-     * 変更しない。
-     */
+function getSupportMessages() {
 
-    localStorage.setItem(
-        STORAGE_SUPPORT,
-        currentSupportMessage
-    );
+    try {
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEYS.messages
+                )
+            );
+
+        if (
+            Array.isArray(data) &&
+            data.length > 0
+        ) {
+
+            const valid =
+                data.filter(
+                    message =>
+                        typeof message === "string" &&
+                        message.trim() !== ""
+                );
+
+            if (valid.length > 0) {
+                return valid;
+            }
+
+        }
+
+    } catch {}
+
+    return defaultSupportMessages;
 
 }
 
 
 /* =========================================================
-   クールタイム中のコンテンツ
+   クールタイム中の神託
 ========================================================= */
 
-function showCooldownContent() {
+function getCooldownSupport() {
 
-    if (!cooldownMessageElement) {
+    const cooldownEnd =
+        getCooldownEnd();
+
+    try {
+
+        const saved =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEYS.cooldownSupport
+                )
+            );
+
+        if (
+            saved &&
+            saved.cooldownEnd === cooldownEnd &&
+            saved.message
+        ) {
+            return saved.message;
+        }
+
+    } catch {}
+
+    const message =
+        randomItem(
+            getSupportMessages()
+        );
+
+    localStorage.setItem(
+        STORAGE_KEYS.cooldownSupport,
+        JSON.stringify({
+            cooldownEnd,
+            message
+        })
+    );
+
+    return message;
+
+}
+
+
+function showCooldownSupport() {
+
+    if (!cooldownMessage) {
+        return;
+    }
+
+    let title =
+        cooldownMessage.querySelector(
+            ".support-title"
+        );
+
+    let text =
+        cooldownMessage.querySelector(
+            ".support-text"
+        );
+
+    if (!title) {
+
+        title =
+            document.createElement("div");
+
+        title.className =
+            "support-title";
+
+        title.textContent =
+            "✦ 学びの神託";
+
+        cooldownMessage.appendChild(
+            title
+        );
+
+    }
+
+    if (!text) {
+
+        text =
+            document.createElement("div");
+
+        text.className =
+            "support-text";
+
+        cooldownMessage.appendChild(
+            text
+        );
+
+    }
+
+    text.textContent =
+        getCooldownSupport();
+
+    title.style.display = "block";
+    text.style.display = "block";
+
+}
+
+
+/* =========================================================
+   神託・課題を非表示
+========================================================= */
+
+function hideCooldownContents() {
+
+    if (!cooldownMessage) {
+        return;
+    }
+
+    const title =
+        cooldownMessage.querySelector(
+            ".support-title"
+        );
+
+    const text =
+        cooldownMessage.querySelector(
+            ".support-text"
+        );
+
+    const challenge =
+        cooldownMessage.querySelector(
+            ".today-challenge"
+        );
+
+    if (title) {
+        title.style.display = "none";
+    }
+
+    if (text) {
+        text.style.display = "none";
+    }
+
+    if (challenge) {
+        challenge.style.display = "none";
+    }
+
+}
+
+
+/* =========================================================
+   本日の課題
+========================================================= */
+
+const studyChallenges = [
+
+    "英単語を10個覚える",
+    "数学の問題を3問解く",
+    "教科書を5ページ読む",
+    "漢字を10個復習する",
+    "昨日間違えた問題を3問解き直す",
+    "英語の長文を1題読む",
+    "理科の用語を10個確認する",
+    "社会の重要語句を10個覚える",
+    "今日習った内容を5分復習する",
+    "苦手な問題を1問だけ解いてみる",
+    "ノートを整理する",
+    "公式を5個復習する",
+    "英単語を発音しながら10個覚える",
+    "教科書の重要部分を確認する",
+    "小テストの間違いを復習する",
+    "問題集を1ページ進める",
+    "漢字を5個覚える",
+    "歴史の重要人物を5人確認する",
+    "理科の図を一つ覚える",
+    "今日の授業内容を自分の言葉で説明する"
+
+];
+
+
+function getTodayKey() {
+
+    const date =
+        new Date();
+
+    return (
+        `${date.getFullYear()}-` +
+        `${String(date.getMonth() + 1).padStart(2, "0")}-` +
+        `${String(date.getDate()).padStart(2, "0")}`
+    );
+
+}
+
+
+function getTodayChallenge() {
+
+    const today =
+        getTodayKey();
+
+    try {
+
+        const saved =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEYS.challenge
+                )
+            );
+
+        if (
+            saved &&
+            saved.date === today
+        ) {
+            return saved.challenge;
+        }
+
+    } catch {}
+
+    const challenge =
+        randomItem(
+            studyChallenges
+        );
+
+    localStorage.setItem(
+        STORAGE_KEYS.challenge,
+        JSON.stringify({
+            date: today,
+            challenge
+        })
+    );
+
+    return challenge;
+
+}
+
+
+function showTodayChallenge() {
+
+    if (!cooldownMessage) {
+        return;
+    }
+
+    let challenge =
+        cooldownMessage.querySelector(
+            ".today-challenge"
+        );
+
+    if (!challenge) {
+
+        challenge =
+            document.createElement("div");
+
+        challenge.className =
+            "today-challenge";
+
+        challenge.innerHTML = `
+            <div class="challenge-title">
+                本日挑戦する課題
+            </div>
+
+            <div class="challenge-text"></div>
+        `;
+
+        cooldownMessage.appendChild(
+            challenge
+        );
+
+    }
+
+    challenge.style.display =
+        "block";
+
+    const challengeText =
+        challenge.querySelector(
+            ".challenge-text"
+        );
+
+    if (challengeText) {
+        challengeText.textContent =
+            getTodayChallenge();
+    }
+
+}
+
+
+/* =========================================================
+   クールタイム更新
+========================================================= */
+
+function updateCooldown() {
+
+    const end =
+        getCooldownEnd();
+
+    const remaining =
+        end - Date.now();
+
+    if (remaining <= 0) {
+
+        if (drawButton) {
+
+            drawButton.disabled =
+                false;
+
+            drawButton.textContent =
+                "御神籤を引く";
+
+        }
+
+        if (cooldownElement) {
+
+            cooldownElement.textContent =
+                "今すぐ御神籤を引けます";
+
+        }
+
+        hideCooldownContents();
 
         return;
 
     }
 
 
-    if (!currentSupportMessage) {
+    if (drawButton) {
 
-        chooseSupportMessage();
+        drawButton.disabled =
+            true;
 
-    }
-
-
-    if (!todayChallenge) {
-
-        createTodayChallenge();
+        drawButton.textContent =
+            "神託を待っています…";
 
     }
 
 
-    cooldownMessageElement.innerHTML = `
+    if (cooldownElement) {
 
-        <div class="support-title">
-            🌸 学びの神託
-        </div>
+        cooldownElement.textContent =
+            `次の御神籤まで ${formatTime(remaining)}`;
 
-        <div class="support-text">
-            「${escapeHTML(currentSupportMessage)}」
-        </div>
-
-        <div class="today-challenge">
-
-            <div class="challenge-title">
-                📚 本日挑戦する課題
-            </div>
-
-            <div class="challenge-text">
-                ${escapeHTML(todayChallenge)}
-            </div>
-
-        </div>
-
-    `;
+    }
 
 
-    cooldownMessageElement.style.display =
-        "block";
+    showCooldownSupport();
+    showTodayChallenge();
 
 }
 
 
 /* =========================================================
-   重複ボーナス
+   御神籤を引く
 ========================================================= */
 
-function showDuplicateNotification() {
+function handleDraw() {
 
-    let notification =
-        document.querySelector(
-            ".duplicate-notification"
-        );
+    if (isCooldown()) {
 
+        updateCooldown();
 
-    /*
-     * なければ自動生成
-     */
-
-    if (!notification) {
-
-        notification =
-            document.createElement(
-                "div"
-            );
-
-
-        notification.className =
-            "duplicate-notification";
-
-
-        document.body.appendChild(
-            notification
-        );
+        return;
 
     }
 
+    const item =
+        drawQuote();
 
-    notification.innerHTML = `
+    if (!item) {
+        return;
+    }
 
-        <div class="duplicate-title">
-            ✦ 重複ボーナス
-        </div>
+    displayQuote(item);
 
-        <div class="duplicate-text">
-            すでに図鑑に登録されている御神籤です
-        </div>
+    registerQuote(item);
 
-        <div class="duplicate-bonus">
-            次のクールタイム −5分
-        </div>
-
-    `;
-
-
-    notification.classList.add(
-        "show"
+    localStorage.setItem(
+        STORAGE_KEYS.currentQuote,
+        JSON.stringify(item)
     );
 
+    setCooldown();
 
-    /*
-     * 3秒後に消す
-     */
-
-    setTimeout(
-        () => {
-
-            notification.classList.remove(
-                "show"
-            );
-
-        },
-        3000
+    localStorage.removeItem(
+        STORAGE_KEYS.cooldownSupport
     );
+
+    getCooldownSupport();
+
+    updateCooldown();
+
+    playRarityEffect(item);
 
 }
 
@@ -1633,63 +1838,86 @@ function showDuplicateNotification() {
 
 function playRarityEffect(item) {
 
-    /*
-     * シークレットの場合
-     */
+    let overlay =
+        document.getElementById(
+            "rarityEffect"
+        );
 
-    if (
-        item.fortune ===
-        "シークレット"
+    if (!overlay) {
+
+        overlay =
+            document.createElement("div");
+
+        overlay.id =
+            "rarityEffect";
+
+        document.body.appendChild(
+            overlay
+        );
+
+    }
+
+    overlay.className =
+        "rarity-effect";
+
+    if (item.rarity === "シークレット") {
+
+        overlay.classList.add("secret");
+
+    } else if (
+        item.rarity === "スーパー大吉"
     ) {
 
-        document.body.classList.add(
-            "secret-effect"
-        );
+        overlay.classList.add("super");
 
+    } else if (
+        item.rarity === "大大吉"
+    ) {
 
-        setTimeout(
-            () => {
+        overlay.classList.add("gold");
 
-                document.body.classList.remove(
-                    "secret-effect"
-                );
+    } else {
 
-            },
-            2500
-        );
-
-
-        return;
+        overlay.classList.add("normal");
 
     }
 
 
-    /*
-     * 大大吉
-     */
+    let symbol = "✦";
 
-    if (
-        item.fortune ===
-        "大大吉"
+    if (item.rarity === "シークレット") {
+        symbol = "☾";
+    } else if (
+        item.rarity === "スーパー大吉"
     ) {
-
-        document.body.classList.add(
-            "great-effect"
-        );
-
-
-        setTimeout(
-            () => {
-
-                document.body.classList.remove(
-                    "great-effect"
-                );
-
-            },
-            1800
-        );
-
+        symbol = "🌟";
+    } else if (
+        item.rarity === "大大吉"
+    ) {
+        symbol = "✨";
     }
+
+
+    overlay.innerHTML = `
+
+        <div class="effect-symbol">
+            ${symbol}
+        </div>
+
+        <div class="effect-text">
+            ${item.rarity}
+        </div>
+
+    `;
+
+    overlay.classList.add("show");
+
+    setTimeout(
+        () => {
+            overlay.classList.remove("show");
+        },
+        1800
+    );
 
 }
 
@@ -1700,16 +1928,13 @@ function playRarityEffect(item) {
 
 function openSettings() {
 
-    renderMessageInputs();
-
-
-    if (settingsModal) {
-
-        settingsModal.classList.add(
-            "open"
-        );
-
+    if (!settingsModal) {
+        return;
     }
+
+    loadSettingsInputs();
+
+    settingsModal.classList.add("open");
 
 }
 
@@ -1717,138 +1942,99 @@ function openSettings() {
 function closeSettingsModal() {
 
     if (settingsModal) {
-
-        settingsModal.classList.remove(
-            "open"
-        );
-
+        settingsModal.classList.remove("open");
     }
 
 }
 
 
-/* =========================================================
-   設定メッセージ表示
-========================================================= */
-
-function renderMessageInputs() {
+function loadSettingsInputs() {
 
     if (!messageInputs) {
-
         return;
-
     }
-
 
     messageInputs.innerHTML = "";
 
+    let messages = [];
 
-    /*
-     * まだ設定がない場合
-     */
+    try {
 
-    if (
-        supportMessages.length === 0
-    ) {
+        messages =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEYS.messages
+                )
+            );
 
-        createMessageInput("");
+    } catch {
 
-        return;
+        messages = [];
 
     }
 
+    if (
+        !Array.isArray(messages) ||
+        messages.length === 0
+    ) {
+        messages = [""];
+    }
 
-    supportMessages.forEach(
+    messages.forEach(
         message => {
-
-            createMessageInput(
-                message
-            );
-
+            createMessageInput(message);
         }
     );
 
 }
 
 
-/* =========================================================
-   メッセージ入力欄作成
-========================================================= */
-
-function createMessageInput(value) {
+function createMessageInput(value = "") {
 
     if (!messageInputs) {
-
         return;
-
     }
 
-
     const row =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     row.className =
         "message-row";
 
+    row.innerHTML = `
+
+        <input
+            type="text"
+            maxlength="100"
+            placeholder="勉強の応援メッセージ"
+        >
+
+        <button
+            type="button"
+            class="delete-message"
+        >
+            ×
+        </button>
+
+    `;
 
     const input =
-        document.createElement(
-            "input"
-        );
-
-
-    input.type =
-        "text";
-
-
-    input.placeholder =
-        "勉強を応援するメッセージ";
-
+        row.querySelector("input");
 
     input.value =
-        value || "";
-
+        value;
 
     const deleteButton =
-        document.createElement(
-            "button"
+        row.querySelector(
+            ".delete-message"
         );
-
-
-    deleteButton.type =
-        "button";
-
-
-    deleteButton.className =
-        "delete-message";
-
-
-    deleteButton.textContent =
-        "×";
-
 
     deleteButton.addEventListener(
         "click",
         () => {
-
             row.remove();
-
         }
     );
-
-
-    row.appendChild(
-        input
-    );
-
-
-    row.appendChild(
-        deleteButton
-    );
-
 
     messageInputs.appendChild(
         row
@@ -1857,179 +2043,382 @@ function createMessageInput(value) {
 }
 
 
-/* =========================================================
-   設定保存
-========================================================= */
-
-function saveSupportMessages() {
+function saveSettings() {
 
     if (!messageInputs) {
-
         return;
-
     }
-
 
     const inputs =
         messageInputs.querySelectorAll(
             "input"
         );
 
-
-    supportMessages =
+    const messages =
         Array.from(inputs)
-
             .map(
                 input =>
                     input.value.trim()
             )
-
             .filter(
                 message =>
                     message.length > 0
             );
 
 
-    localStorage.setItem(
-        STORAGE_MESSAGES,
-        JSON.stringify(
-            supportMessages
-        )
-    );
+    if (messages.length === 0) {
 
+        localStorage.removeItem(
+            STORAGE_KEYS.messages
+        );
 
-    /*
-     * 現在のクールタイム中の
-     * 学びの神託は変更しない。
-     *
-     * 次回の御神籤から反映される。
-     */
+    } else {
 
+        localStorage.setItem(
+            STORAGE_KEYS.messages,
+            JSON.stringify(messages)
+        );
+
+    }
 
     closeSettingsModal();
 
+    showSavedNotification();
+
 }
 
 
-/* =========================================================
-   図鑑データ読み込み
-========================================================= */
+function showSavedNotification() {
 
-function loadCollection() {
+    let notification =
+        document.querySelector(
+            ".settings-saved"
+        );
 
-    try {
+    if (!notification) {
 
-        const data =
-            JSON.parse(
-                localStorage.getItem(
-                    STORAGE_COLLECTION
-                )
-            );
+        notification =
+            document.createElement("div");
 
+        notification.className =
+            "collection-effect settings-saved";
 
-        if (
-            Array.isArray(data)
-        ) {
-
-            return data
-
-                .map(Number)
-
-                .filter(
-                    id =>
-                        Number.isInteger(id) &&
-                        id >= 1 &&
-                        id <= quotes.length
-                );
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "図鑑データの読み込みに失敗しました。",
-            error
+        document.body.appendChild(
+            notification
         );
 
     }
 
+    notification.textContent =
+        "✓ 設定を保存しました";
 
-    return [];
+    notification.classList.add("show");
+
+    setTimeout(
+        () => {
+            notification.classList.remove("show");
+        },
+        2200
+    );
 
 }
 
 
 /* =========================================================
-   応援メッセージ読み込み
+   現在の名言を復元
 ========================================================= */
 
-function loadMessages() {
+function restoreCurrentQuote() {
 
     try {
 
-        const data =
+        const saved =
             JSON.parse(
                 localStorage.getItem(
-                    STORAGE_MESSAGES
+                    STORAGE_KEYS.currentQuote
                 )
             );
 
+        if (saved && saved.id) {
 
-        if (
-            Array.isArray(data)
-        ) {
-
-            return data
-
-                .filter(
-                    message =>
-                        typeof message ===
-                        "string"
-                )
-
-                .map(
-                    message =>
-                        message.trim()
-                )
-
-                .filter(
-                    message =>
-                        message.length > 0
+            const item =
+                quotes.find(
+                    quote =>
+                        quote.id === saved.id
                 );
+
+            if (item) {
+
+                displayQuote(item);
+
+                return;
+
+            }
 
         }
 
-    } catch (error) {
+    } catch {}
 
-        console.error(
-            "設定データの読み込みに失敗しました。",
-            error
-        );
 
+    if (fortuneElement) {
+        fortuneElement.textContent =
+            "学びの神託";
     }
 
+    if (quoteElement) {
+        quoteElement.textContent =
+            "「今日の一歩が、未来を変える。」";
+    }
 
-    return [];
+    if (authorElement) {
+        authorElement.textContent =
+            "― 学びの御神籤";
+    }
 
 }
 
 
 /* =========================================================
-   HTMLエスケープ
+   イベント
 ========================================================= */
 
-function escapeHTML(text) {
+if (drawButton) {
 
-    const div =
-        document.createElement(
-            "div"
-        );
-
-
-    div.textContent =
-        String(text);
-
-
-    return div.innerHTML;
+    drawButton.addEventListener(
+        "click",
+        handleDraw
+    );
 
 }
+
+
+if (settingsButton) {
+
+    settingsButton.addEventListener(
+        "click",
+        openSettings
+    );
+
+}
+
+
+if (closeSettings) {
+
+    closeSettings.addEventListener(
+        "click",
+        closeSettingsModal
+    );
+
+}
+
+
+if (addMessageButton) {
+
+    addMessageButton.addEventListener(
+        "click",
+        () => {
+            createMessageInput();
+        }
+    );
+
+}
+
+
+if (saveSettingsButton) {
+
+    saveSettingsButton.addEventListener(
+        "click",
+        saveSettings
+    );
+
+}
+
+
+if (closeModal) {
+
+    closeModal.addEventListener(
+        "click",
+        closeQuoteModal
+    );
+
+}
+
+
+/* =========================================================
+   モーダル外クリック
+========================================================= */
+
+if (modal) {
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (event.target === modal) {
+                closeQuoteModal();
+            }
+
+        }
+    );
+
+}
+
+
+if (settingsModal) {
+
+    settingsModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === settingsModal
+            ) {
+                closeSettingsModal();
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ESCキー
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+
+            closeQuoteModal();
+            closeSettingsModal();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   クールタイム監視
+========================================================= */
+
+setInterval(
+    updateCooldown,
+    1000
+);
+
+
+/* =========================================================
+   初期化
+========================================================= */
+
+function initialize() {
+
+    console.log(
+        `学びの御神籤：${quotes.length}種類`
+    );
+
+    renderBook();
+
+    restoreCurrentQuote();
+
+    updateCooldown();
+
+    /*
+     * すでに100種類集めていて、
+     * まだコンプリート演出を見ていない場合
+     */
+    checkCompletion();
+
+}
+
+
+/* =========================================================
+   DOM読み込み
+========================================================= */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initialize
+    );
+
+} else {
+
+    initialize();
+
+}
+
+
+/* =========================================================
+   デバッグ用
+========================================================= */
+
+window.ManabiOmikuji = {
+
+    quotes,
+
+    getCollection,
+
+    getCooldownEnd,
+
+    drawQuote,
+
+    renderBook,
+
+    updateAchievement,
+
+    checkCompletion,
+
+    resetCooldown() {
+
+        localStorage.removeItem(
+            STORAGE_KEYS.cooldown
+        );
+
+        localStorage.removeItem(
+            STORAGE_KEYS.cooldownSupport
+        );
+
+        updateCooldown();
+
+    },
+
+    resetCollection() {
+
+        localStorage.removeItem(
+            STORAGE_KEYS.collection
+        );
+
+        localStorage.removeItem(
+            STORAGE_KEYS.completed
+        );
+
+        renderBook();
+
+    },
+
+    resetAll() {
+
+        Object.values(
+            STORAGE_KEYS
+        ).forEach(
+            key => {
+                localStorage.removeItem(
+                    key
+                );
+            }
+        );
+
+        location.reload();
+
+    }
+
+};
